@@ -11,5 +11,105 @@ generator client {
 datasource db {
   provider = "cockroachdb"
   url      = env("DATABASE_URL")
+  relationMode = "prisma"
+  
 }
 
+enum status{
+  upcoming
+  ongoing
+  closed
+  finished
+  cancelled
+  completed
+  completed_invoice
+  archive
+}
+
+enum schedule_training_status{
+  pending
+  refused
+  approved
+  rejected
+  waiting
+  completed
+  paymentStatus
+  cancellationRequest
+
+}
+
+enum exam_result_status{
+  approved
+  rejected
+  completed
+  cancelled
+  requested
+  accepted
+  waiting
+  notAttended
+  succeed
+  failed
+  certificateIssued
+}
+
+model trainings{
+  id String @id @unique @default(uuid())
+  subject String
+  details String 
+  participant_fees Decimal
+  currency String
+  free_cancellation DateTime
+  late_cancellation_rate BigInt
+  language String
+  type String
+  limit BigInt
+  startDate DateTime
+  endDate DateTime
+  certification_expration_time DateTime
+  training_leader String
+  exam_pass_rate Int
+  assesment_required Boolean
+  published Boolean
+  status status
+  photo String
+  country String
+  state String
+  city String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  scheduleTrainings schedule_trainings[]
+
+}
+model schedule_trainings{
+  id String @id @unique @default(uuid())
+  training trainings @relation(fields: [trainingId],references: [id])
+  trainingId String 
+  user_id String
+  company_id String
+  status schedule_training_status
+  payment_status String @default("unpaid")
+  accepted_by String
+  accepted_date String
+  approved_by String
+  approved_date String
+  rejected_by String
+  rejected_date String
+  training_fees Float
+  payment_status_updated_by String
+  payment_status_updated_date String
+  cancellation_request_by String
+  cancellation_request_date String
+  user_training_fee Float
+  exam_result Float
+  exam_result_status exam_result_status
+  invoice_done Boolean
+  payment_recieved Boolean
+  invoice_number String
+  approved_reasons String
+  purchase_number String
+  joining_waiting_list_date DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([trainingId])
+}
