@@ -52,6 +52,12 @@ enum exam_result_status{
   certificateIssued
 }
 
+enum certificate_status{
+  VALID
+  INVALID
+  CANCELED
+}
+
 model trainings{
   id String @id @unique @default(uuid())
   subject String
@@ -112,4 +118,40 @@ model schedule_trainings{
   updatedAt DateTime @updatedAt
 
   @@index([trainingId])
+}
+model product_groups{
+  id String @id @unique @default(uuid())
+  name String
+  description String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model product_models{
+  id String @id @unique @default(uuid())
+  product_group_id String
+  name String
+  description String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model certificates{
+  id String @id @unique @default(uuid())
+  training_id String
+  certificate_name String
+  certificate_no String
+  user_name String
+  company_name String
+  issued_by String
+  start_date DateTime
+  end_date DateTime
+  issued_date DateTime
+  valid_to DateTime
+  user_id String
+  company_id String
+  status certificate_status
+  is_archived Boolean
+  template_id String
+  needRecreate Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
