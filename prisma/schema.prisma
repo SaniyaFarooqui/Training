@@ -59,16 +59,16 @@ enum certificate_status{
 }
 
 model trainings{
-  id String @id @unique @default(uuid())
+  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   subject String
   details String 
   participant_fees Decimal
   currency String
   free_cancellation DateTime
-  late_cancellation_rate BigInt
+  late_cancellation_rate Int
   language String
   type String
-  limit BigInt
+  limit Int
   startDate DateTime
   endDate DateTime
   certification_expration_time DateTime
