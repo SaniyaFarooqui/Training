@@ -8,10 +8,10 @@ export default interface trainings{
   participant_fees ?: Decimal | undefined
   currency :string | undefined
   free_cancellation ?:Date | undefined
-  late_cancellation_rate ?:BigInt | undefined
+  late_cancellation_rate ?:number | undefined
   language ?:string | undefined
   type ?:string | undefined
-  limit ?:BigInt | undefined
+  limit ?:number | undefined
   startDate ?:Date | undefined
   endDate ?:Date | undefined
   certification_expration_time?: Date | undefined

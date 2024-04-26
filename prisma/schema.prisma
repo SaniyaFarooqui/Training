@@ -4,6 +4,7 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,6 +15,205 @@ datasource db {
   relationMode = "prisma"
   
 }
+
+model trainings{
+  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  subject String
+  details String 
+  participant_fees Decimal
+  currency String
+  free_cancellation DateTime
+  late_cancellation_rate Int
+  language String
+  type String
+  limit Int
+  startDate DateTime
+  endDate DateTime
+  certification_expration_time DateTime
+  training_leader String
+  exam_pass_rate Int
+  assesment_required Boolean
+  published Boolean
+  status status
+  photo String
+  country String
+  state String
+  city String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  scheduleTrainings schedule_trainings[]
+}
+model schedule_trainings{
+  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  trainingId String 
+  user_id String
+  company_id String
+  status schedule_training_status
+  payment_status String @default("unpaid")
+  accepted_by String
+  accepted_date String
+  approved_by String
+  approved_date String
+  rejected_by String
+  rejected_date String
+  training_fees Float
+  payment_status_updated_by String
+  payment_status_updated_date String
+  cancellation_request_by String
+  cancellation_request_date String
+  user_training_fee Float
+  exam_result Float
+  exam_result_status exam_result_status
+  invoice_done Boolean
+  payment_recieved Boolean
+  invoice_number String
+  approved_reasons String
+  purchase_number String
+  joining_waiting_list_date DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  training trainings @relation(fields: [trainingId],references: [id])
+}
+model product_groups{
+  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name String
+  description String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model product_group_trainings{
+  id String @id @unique @default(uuid())
+  approvalCertificateId String
+  product_group_id String
+  product_group_name String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model product_models{
+  id String @id @unique @default(uuid())
+  product_group_id String
+  name String
+  description String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model  product_model_trainings{
+  id String @id @unique @default(uuid())
+  training_id String
+  product_group_id String
+  product_model_id String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+} 
+
+model companies{
+  id String @id @unique @default(uuid())
+  admin_confirmation String
+  profile_image String
+  banner_image String
+  name String
+  email String
+  vat_number String
+  invoice_email String
+  address String
+  zip_code String
+  city String
+  country String
+  state String
+  phone String
+  currency currency
+  status String
+  discount_level_a Int
+  discount_level_b Int
+  discount_level_c Int
+  is_deleted Boolean
+  registered Boolean
+  country_id Int
+  state_id Int
+  city_id Int
+  register_number String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model users{
+  id String @id @unique @default(uuid())
+  name String
+  surname String
+  personal_title String
+  work_title String
+  email String
+  role_id String
+  company_id String
+  status String
+  mobile_phone String
+  office_phone String
+  profile_image String
+  password String
+  TwoFactorAuthentication Boolean
+  TwoFactorForced Boolean
+  TwoFactorAuthenticationSecret String
+  emailConfirmed Boolean
+  address String
+  adminConfirmed String
+  registered Boolean
+  accessFailedCount Int
+  access_failed_restrict DateTime
+  is_deleted Boolean
+  inviter_id String
+  inviter_type inviter_type
+  approved_by String
+  approved_date DateTime
+  declined_by String
+  declined_date DateTime
+  country_id Int
+  state_id Int
+  type type
+  city_id Int
+  date_of_birth DateTime
+  zip_code String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model certificates{
+  id String @id @unique @default(uuid())
+  training_id String
+  certificate_name String
+  certificate_no String
+  user_name String
+  company_name String
+  issued_by String
+  start_date DateTime
+  end_date DateTime
+  issued_date DateTime
+  valid_to DateTime
+  user_id String
+  company_id String
+  status certificate_status
+  is_archived Boolean
+  template_id String
+  needRecreate Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model certificate_tempalates{
+  id String @id @unique @default(uuid())
+  name String
+  html_code String
+  filename String
+  encoding String
+  mimetype String
+  size Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 
 enum status{
   upcoming
@@ -52,106 +252,183 @@ enum exam_result_status{
   certificateIssued
 }
 
+enum inviter_type{
+  company_admin
+  super_admin
+}
+
+enum type{
+  admin
+  user
+}
+
 enum certificate_status{
   VALID
   INVALID
   CANCELED
 }
 
-model trainings{
-  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  subject String
-  details String 
-  participant_fees Decimal
-  currency String
-  free_cancellation DateTime
-  late_cancellation_rate Int
-  language String
-  type String
-  limit Int
-  startDate DateTime
-  endDate DateTime
-  certification_expration_time DateTime
-  training_leader String
-  exam_pass_rate Int
-  assesment_required Boolean
-  published Boolean
-  status status
-  photo String
-  country String
-  state String
-  city String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  scheduleTrainings schedule_trainings[]
-
-}
-model schedule_trainings{
-  id String @id @unique @default(uuid())
-  training trainings @relation(fields: [trainingId],references: [id])
-  trainingId String 
-  user_id String
-  company_id String
-  status schedule_training_status
-  payment_status String @default("unpaid")
-  accepted_by String
-  accepted_date String
-  approved_by String
-  approved_date String
-  rejected_by String
-  rejected_date String
-  training_fees Float
-  payment_status_updated_by String
-  payment_status_updated_date String
-  cancellation_request_by String
-  cancellation_request_date String
-  user_training_fee Float
-  exam_result Float
-  exam_result_status exam_result_status
-  invoice_done Boolean
-  payment_recieved Boolean
-  invoice_number String
-  approved_reasons String
-  purchase_number String
-  joining_waiting_list_date DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([trainingId])
-}
-model product_groups{
-  id String @id @unique @default(uuid())
-  name String
-  description String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-model product_models{
-  id String @id @unique @default(uuid())
-  product_group_id String
-  name String
-  description String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-model certificates{
-  id String @id @unique @default(uuid())
-  training_id String
-  certificate_name String
-  certificate_no String
-  user_name String
-  company_name String
-  issued_by String
-  start_date DateTime
-  end_date DateTime
-  issued_date DateTime
-  valid_to DateTime
-  user_id String
-  company_id String
-  status certificate_status
-  is_archived Boolean
-  template_id String
-  needRecreate Boolean
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum currency{
+    AED
+    AFN
+    ALL
+    AMD
+    ANG
+    AOA
+    ARS
+    AUD
+    AWG
+    AZN
+    BAM
+    BBD
+    BDT
+    BGN
+    BHD
+    BIF
+    BMD
+    BND
+    BOB
+    BRL
+    BSD
+    BTN
+    BWP
+    BYN
+    BYR
+    BZD
+    CAD
+    CDF
+    CHF
+    CLF
+    CLP
+    CNY
+    COP
+    CRC
+    CUC
+    CUP
+    CVE
+    CZK
+    DJF
+    DKK
+    DOP
+    DZD
+    EGP
+    ERN
+    ETB
+    EUR
+    FJD
+    FKP
+    GBP
+    GEL
+    GHS
+    GIP
+    GMD
+    GNF
+    GTQ
+    GYD
+    HKD
+    HNL
+    HRK
+    HTG
+    HUF
+    IDR
+    ILS
+    INR
+    IQD
+    IRR
+    ISK
+    JMD
+    JOD
+    JPY
+    KES
+    KGS
+    KHR
+    KMF
+    KPW
+    KRW
+    KWD
+    KYD
+    KZT
+    LAK
+    LBP
+    LKR
+    LRD
+    LSL
+    LYD
+    MAD
+    MDL
+    MGA
+    MKD
+    MMK
+    MNT
+    MOP
+    MRO
+    MUR
+    MVR
+    MWK
+    MXN
+    MXV
+    MYR
+    MZN
+    NAD
+    NGN
+    NIO
+    NOK
+    NPR
+    NZD
+    OMR
+    PAB
+    PEN
+    PGK
+    PHP
+    PKR
+    PLN
+    PYG
+    QAR
+    RON
+    RSD
+    RUB
+    RWF
+    SAR
+    SBD
+    SCR
+    SDG
+    SEK
+    SGD
+    SHP
+    SLL
+    SOS
+    SRD
+    SSP
+    STD
+    SVC
+    SYP
+    SZL
+    THB
+    TJS
+    TMT
+    TND
+    TOP
+    TRY
+    TTD
+    TWD
+    TZS
+    UAH
+    UGX
+    USD
+    UYI
+    UYU
+    UZS
+    VEF
+    VND
+    VUV
+    WST
+    XAF
+    XCD
+    XOF
+    XPF
+    XXX
+    YER
+    ZAR
+    ZMW
+    ZWL
 }
