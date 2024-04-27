@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client"
-import { trainings } from "../model/trainings"
+import { trainings } from "@prisma/client/edge"
 
 
 class TrainingRepository{

@@ -15,9 +15,9 @@ class schedule_trainingController {
             try {
                 let schedule_trainingResponse = await this.Schedule_trainingService.CreateSchedule_training(schedule_trainingData)
                 if(schedule_trainingResponse == null || schedule_trainingResponse == undefined){
-                    res.status(400).json({error:"training not created please try again"})
+                    res.status(400).json({error:"schedule_trainings not created please try again"})
                 }else{
-                    res.status(200).json({message:"Training created successfully"})
+                    res.status(200).json({message:"schedule_trainings created successfully"})
                 }
             } catch (error:any) {
                 if(error.errors){
@@ -55,7 +55,7 @@ class schedule_trainingController {
                        if(schedule_trainingResponse == null || schedule_trainingResponse == undefined){
                            res.status(400).json({error : 'something went wrong please try again'})
                        }else{
-                       res.status(200).json({message : " updated training successfully"}) 
+                       res.status(200).json({message : " updated schedule_trainings successfully"}) 
                        }
                    }
                } catch ( error: any ) {
@@ -155,11 +155,11 @@ class schedule_trainingController {
                         }
                     }
                     if(errors.length > 0 && success.length > 0){
-                        res.status(400).json({success:success , errors:errors , message:"Some trainings cannot be deleted !!!!"})
+                        res.status(400).json({success:success , errors:errors , message:"Some schedule_trainings cannot be deleted !!!!"})
                     }else if(success.length > 0 && errors.length == 0){
-                        res.status(200).json({success:success , errors:errors , message:"All Trainings Deleted Successfully !!!!"})
+                        res.status(200).json({success:success , errors:errors , message:"All schedule_trainings Deleted Successfully !!!!"})
                     }else{
-                        res.status(400).json({success:success , errors:errors , message:"Couldn't Delete any of the trainings !!!!"})
+                        res.status(400).json({success:success , errors:errors , message:"Couldn't Delete any of the schedule_trainings !!!!"})
                     }
                 } catch (error:any) {
                     console.log(error)

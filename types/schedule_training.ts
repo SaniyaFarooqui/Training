@@ -1,6 +1,7 @@
 import { Decimal } from "@prisma/client/runtime/library"
+import trainings from "./training_types"
 
-export default interface schedule_trainings{
+export default interface schedule_training{
     id ?:String 
     trainingId?: String 
     user_id ?:String
@@ -26,6 +27,7 @@ export default interface schedule_trainings{
     invoice_number ?:String
     approved_reasons ?:String
     purchase_number ?:String
+    training?:trainings
     joining_waiting_list_date ?:Date
     createdAt ?:Date
     updatedAt ?:Date

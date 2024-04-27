@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import { schedule_trainings } from "../model/schedule_trainings";
+import { schedule_trainings } from "@prisma/client/edge";
+
 class schedule_trainingsRepository{
     prisma: PrismaClient;
     

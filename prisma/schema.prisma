@@ -83,7 +83,7 @@ model product_groups{
 }
 
 model product_group_trainings{
-  id String @id @unique @default(uuid())
+  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   approvalCertificateId String
   product_group_id String
   product_group_name String
@@ -92,7 +92,7 @@ model product_group_trainings{
 }
 
 model product_models{
-  id String @id @unique @default(uuid())
+  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   product_group_id String
   name String
   description String
@@ -102,7 +102,7 @@ model product_models{
 
 
 model  product_model_trainings{
-  id String @id @unique @default(uuid())
+  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   training_id String
   product_group_id String
   product_model_id String
@@ -111,7 +111,7 @@ model  product_model_trainings{
 } 
 
 model companies{
-  id String @id @unique @default(uuid())
+  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   admin_confirmation String
   profile_image String
   banner_image String
@@ -141,7 +141,7 @@ model companies{
 }
 
 model users{
-  id String @id @unique @default(uuid())
+  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name String
   surname String
   personal_title String
@@ -180,8 +180,29 @@ model users{
   updatedAt DateTime @updatedAt
 }
 
+model roles{
+  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name String
+  permissionId String @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  permission permissions @relation(fields: [permissionId],references: [id])
+}
+
+model permissions{
+  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  create Boolean
+  update Boolean
+  edit Boolean
+  delete Boolean
+  view Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  role roles?
+}
+
 model certificates{
-  id String @id @unique @default(uuid())
+  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   training_id String
   certificate_name String
   certificate_no String
@@ -203,7 +224,7 @@ model certificates{
 }
 
 model certificate_tempalates{
-  id String @id @unique @default(uuid())
+  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name String
   html_code String
   filename String

@@ -96,7 +96,7 @@ CREATE TABLE "product_groups" (
 
 -- CreateTable
 CREATE TABLE "product_group_trainings" (
-    "id" STRING NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "approvalCertificateId" STRING NOT NULL,
     "product_group_id" STRING NOT NULL,
     "product_group_name" STRING NOT NULL,
@@ -108,7 +108,7 @@ CREATE TABLE "product_group_trainings" (
 
 -- CreateTable
 CREATE TABLE "product_models" (
-    "id" STRING NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "product_group_id" STRING NOT NULL,
     "name" STRING NOT NULL,
     "description" STRING NOT NULL,
@@ -120,7 +120,7 @@ CREATE TABLE "product_models" (
 
 -- CreateTable
 CREATE TABLE "product_model_trainings" (
-    "id" STRING NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "training_id" STRING NOT NULL,
     "product_group_id" STRING NOT NULL,
     "product_model_id" STRING NOT NULL,
@@ -132,7 +132,7 @@ CREATE TABLE "product_model_trainings" (
 
 -- CreateTable
 CREATE TABLE "companies" (
-    "id" STRING NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "admin_confirmation" STRING NOT NULL,
     "profile_image" STRING NOT NULL,
     "banner_image" STRING NOT NULL,
@@ -165,7 +165,7 @@ CREATE TABLE "companies" (
 
 -- CreateTable
 CREATE TABLE "users" (
-    "id" STRING NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "name" STRING NOT NULL,
     "surname" STRING NOT NULL,
     "personal_title" STRING NOT NULL,
@@ -207,8 +207,33 @@ CREATE TABLE "users" (
 );
 
 -- CreateTable
+CREATE TABLE "roles" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "name" STRING NOT NULL,
+    "permissionId" STRING NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "roles_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "permissions" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "create" BOOL NOT NULL,
+    "update" BOOL NOT NULL,
+    "edit" BOOL NOT NULL,
+    "delete" BOOL NOT NULL,
+    "view" BOOL NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "permissions_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "certificates" (
-    "id" STRING NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "training_id" STRING NOT NULL,
     "certificate_name" STRING NOT NULL,
     "certificate_no" STRING NOT NULL,
@@ -233,7 +258,7 @@ CREATE TABLE "certificates" (
 
 -- CreateTable
 CREATE TABLE "certificate_tempalates" (
-    "id" STRING NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "name" STRING NOT NULL,
     "html_code" STRING NOT NULL,
     "filename" STRING NOT NULL,
@@ -269,6 +294,12 @@ CREATE UNIQUE INDEX "companies_id_key" ON "companies"("id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "users_id_key" ON "users"("id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "roles_id_key" ON "roles"("id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "permissions_id_key" ON "permissions"("id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "certificates_id_key" ON "certificates"("id");
