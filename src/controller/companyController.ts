@@ -1,30 +1,31 @@
-import UserServiceImplementation from "../service/implementation/UserServiceImplementation";
-import { Request,Response } from "express";
+import CompanyServiceImplementation from "../service/implementation/companyServiceImplementation";
+import { Response,Request } from "express";
 
-class UserController{
-    user_service: UserServiceImplementation
+class CompanyController{
+    Company_service: CompanyServiceImplementation
 
     constructor(){
-        this.user_service= new UserServiceImplementation();
+        this.Company_service= new CompanyServiceImplementation();
     }
-    public CreateUser = async(req:Request,res:Response)=>{
-        let userData =req.body
-        if(userData.name == null || userData.name == undefined || userData.email== undefined|| userData.email == null || userData.password == null || userData.password == undefined){
+    public CreateCompany = async(req:Request,res:Response)=>{
+        let CompanyData =req.body
+        if(CompanyData.name == null || CompanyData.name == undefined|| CompanyData.email == null || CompanyData.email == undefined){
             res.status(400).json({error:"please provide the data"})
         }else{
             try {
-                let isExist = await this.user_service.GetUserByName(userData.name)
-                if(isExist == null || isExist == undefined){
-                    let userResponse = await this.user_service.CreateUser(userData) 
-                    if(userResponse == 0){
+                let isExist = await this.Company_service.GetCompanyByEmail(CompanyData.email)
+                if(isExist == null){
+                    let CompanyResponse = await this.Company_service.CreateCompany(CompanyData) 
+                    if(CompanyResponse == 0){
                         res.status(400).json({error:"couldnot able to create please try again"})
                     }else{
                         res.status(200).json({message:"created successfully"})
                     }
                 }else{
-                    res.status(400).json({error:`${userData.name} already exists please try different name`})
+                    res.status(400).json({error:`${CompanyData.email} already exists please try different email`})
                 }
-            } catch (error:any) {
+                
+            } catch (error:any) { 
                 if(error.errors){
                     let validationerror = []
                     for await(let response of error.errors){
@@ -43,19 +44,19 @@ class UserController{
             }
         }
     }
-    public UpdateUser = async(req:Request,res:Response)=>{
+    public UpdateCompany = async(req:Request,res:Response)=>{
         let id = req.params.id
-        let userData = req.body
+        let CompanyData = req.body
         if(id == null || id == undefined){
             res.status(400).json({error:"please provide id"})
         }else{
             try {
-                let isExist = await this.user_service.GetUserById(id)
+                let isExist = await this.Company_service.GetCompanyById(id)
                 if(isExist == null || isExist == undefined){
-                    res.status(400).json({error: "please select user properly"})
+                    res.status(400).json({error: "please select Company properly"})
                 }else{
-                    let userResponse = await this.user_service.UpdateUser(id,userData)
-                    if(userResponse > 0 ){
+                    let CompanyResponse = await this.Company_service.UpdateCompany(id,CompanyData)
+                    if(CompanyResponse > 0 ){
                         res.status(200).json({message: "updated successfully"})
                     }else{
                         res.status(400).json({error: "could not able to update"})
@@ -80,49 +81,50 @@ class UserController{
             }
         }
     }
-    public GetUserById = async (req : Request,res:Response) => {
+    public GetCompanyById = async (req : Request,res:Response) => {
         let id = req.params.id;
         if(id == null || id == undefined){
             res.status(404).json({error:"please provide id"})
         }else{
             try {
-                let userResponse = await this.user_service.GetUserById(id);
-                if(userResponse == null || userResponse == undefined){
-                    res.status(400).json({error:"No User Exists"});
+                let CompanyResponse = await this.Company_service.GetCompanyById(id);
+                if(CompanyResponse == null || CompanyResponse == undefined){
+                    res.status(400).json({error:"No Company Exists"});
                 }
                 else{
-                    res.status(200).json({data: userResponse});
+                    res.status(200).json({data: CompanyResponse});
                 }
             } catch (error : any) {
                 res.status(400).json({error:error.message});
             }
         }
     }
-    public GetAllUsers = async (req : Request,res:Response) => {
+    public GetAllCompanies = async (req : Request,res:Response) => {
         let page = req.query.page as unknown as number;
         let limit = req.query.limit as unknown as number;
         let keyword = req.query.keyword as string;
         let filterBy =req.query.filterBy as string;
         keyword = keyword == null || keyword == undefined ? "": keyword
         try {
-            let userResponse :{count : number,rows:object[]} | {error ?: string ,status?:number } = await this.user_service.GetAllUsers(page,limit,keyword,filterBy);
-            if(userResponse == null || userResponse == undefined || page == undefined || limit == undefined||page == null || limit == null){
-                res.status(200).json({data:userResponse});
+            let CompanyResponse :{count : number,rows:object[]} | {error ?: string ,status?:number } = await this.Company_service.GetAllCompanies(page,limit,keyword,filterBy);
+            console.log(CompanyResponse)
+            if(CompanyResponse == null || CompanyResponse == undefined || page == undefined || limit == undefined||page == null || limit == null){
+                res.status(200).json({data:CompanyResponse});
             }else{
-                res.status(200).json({data : userResponse});
+                res.status(200).json({data : CompanyResponse});
             }
         } catch (error:any) {
             res.status(400).json({error:error.message});
         }
     }
-    public DeleteUser = async(req:Request,res:Response)=>{
+    public DeleteCompany = async(req:Request,res:Response)=>{
         let id = req.params.id
         if(id == null || id == undefined){
             res.status(400).json({error:"please provide id"})
         }else{
             try {
-                let userResponse = await this.user_service.DeleteUser(id)
-                if(userResponse == 0){
+                let CompanyResponse = await this.Company_service.DeleteCompany(id)
+                if(CompanyResponse == 0){
                     res.status(400).json({error:"couldnot able to delete please try again later"})
                 }else{
                     res.status(200).json({message:"deleted successfully"})
@@ -132,7 +134,7 @@ class UserController{
             }
         }
     }
-    public BulkDeleteUsers = async(req:Request,res:Response) => {
+    public BulkDeleteCompanies = async(req:Request,res:Response) => {
         let {ids} = req.body
         if(ids == null || ids == undefined){
             res.status(400).json({error:"Please provide the id to delete"});
@@ -142,22 +144,22 @@ class UserController{
             if(ids.length > 0){
                 try {
                     for await(let id of ids){
-                        let user = await this.user_service.GetUserById(id)
-                        if(user != null || user != undefined){
-                            let response = await this.user_service.DeleteUser(id);
+                        let Company = await this.Company_service.GetCompanyById(id)
+                        if(Company != null || Company != undefined){
+                            let response = await this.Company_service.DeleteCompany(id);
                             if(response){
-                                success.push(`${user.subject} Deleted Successfully`)
+                                success.push(`${Company.subject} Deleted Successfully`)
                             }else{
-                                errors.push(`${user.subject} Cannot deleted please try again`)
+                                errors.push(`${Company.subject} Cannot deleted please try again`)
                             }
                         }
                     }
                     if(errors.length > 0 && success.length > 0){
-                        res.status(400).json({success:success , errors:errors , message:"Some users cannot be deleted !!!!"})
+                        res.status(400).json({success:success , errors:errors , message:"Some Companys cannot be deleted !!!!"})
                     }else if(success.length > 0 && errors.length == 0){
-                        res.status(200).json({success:success , errors:errors , message:"All users Deleted Successfully !!!!"})
+                        res.status(200).json({success:success , errors:errors , message:"All Companys Deleted Successfully !!!!"})
                     }else{
-                        res.status(400).json({success:success , errors:errors , message:"Couldn't Delete any of the users !!!!"})
+                        res.status(400).json({success:success , errors:errors , message:"Couldn't Delete any of the Companys !!!!"})
                     }
                 } catch (error:any) {
                     console.log(error)
@@ -171,4 +173,4 @@ class UserController{
     }
 }
 
-export default UserController
+export default CompanyController

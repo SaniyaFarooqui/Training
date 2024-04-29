@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { schedule_trainings } from "@prisma/client/edge";
+import { users } from "../model/users";
 
 class schedule_trainingsRepository{
     prisma: PrismaClient;
@@ -26,6 +27,15 @@ class schedule_trainingsRepository{
         return this.prisma.schedule_trainings.findUnique({
             where:{
                 id:id
+            }
+        })
+    }
+
+    public GetSchedule_trainingByUserAndTrainingId = async(user_id : string,training_id:string) : Promise<schedule_trainings|null> =>{
+        return this.prisma.schedule_trainings.findFirst({
+            where:{
+                user_id:user_id,
+                trainingId:training_id
             }
         })
     }

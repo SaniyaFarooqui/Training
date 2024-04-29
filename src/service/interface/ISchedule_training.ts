@@ -10,6 +10,8 @@ interface ISchedule_training{
 
     GetSchedule_trainingById(id:string):Promise<schedule_trainings>
 
+    GetSchedule_trainingByUserAndTrainingId(user_id:string,training_id:string):Promise<schedule_trainings>
+
     DeleteSchedule_training(id:string):Promise<schedule_trainings>
 }
 

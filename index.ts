@@ -4,6 +4,10 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import trainingRouter from "./src/routes/trainingRoutes";
 import schedule_trainingRouter from "./src/routes/schedule_trainingRoutes";
+import UserRouter from "./src/routes/userRoutes";
+import RoleRouter from "./src/routes/roleRoutes";
+import companyRouter from "./src/routes/companyRoutes";
+
 
 
 
@@ -16,6 +20,10 @@ app.use(bodyParser());
 
 app.use("/api/training",trainingRouter)
 app.use("/api/schedule_training",schedule_trainingRouter)
+app.use("/api/user",UserRouter)
+app.use("/api/role",RoleRouter)
+app.use("/api/company",companyRouter)
+
 app.listen(port,()=>{
     console.log(`Server is accesssing on port : ${port}`);
 })

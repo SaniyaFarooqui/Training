@@ -28,7 +28,7 @@ class RoleController{
                     if(role_response == null || role_response == undefined){
                         res.status(200).json({error:"Role cannot be created please try again"});
                     }else{
-                        res.status(200).json({message:`${role.name}created successfully`})
+                        res.status(200).json({message:`${role.name} created successfully`})
                     }
                 }
             } catch (error:any) {
@@ -122,8 +122,8 @@ class RoleController{
         try {
             let roleResponse :{count : number,rows:object[]} | {error ?: string ,status?:number } = await this.role_service.GetAllRoles(page,limit,keyword,filterBy);
             console.log(roleResponse)
-            if(roleResponse == null || roleResponse == undefined || page == undefined || limit == undefined||page == null || limit == null){
-                res.status(400).json({error:"Something went wrong please try again"});
+            if(roleResponse == null || roleResponse == undefined){
+                res.status(200).json({data : roleResponse});
             }else{
                 res.status(200).json({data : roleResponse});
             }

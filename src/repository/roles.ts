@@ -16,7 +16,10 @@ class rolesRepository{
     public GetAllRoles = async(page:number,limit:number,keyword:string,filterBy:string):Promise<{count:number,rows:Array<roles>}>=>{
         let roles = await this.prisma.roles.findMany({
             skip:page,
-            take:limit
+            take:limit,
+            include:{
+                permission:true
+            }
         })
         let count = await this.prisma.roles.count()
         return {count:count,rows:roles}

@@ -1,7 +1,7 @@
 import IUserService from "../interface/IUser";
 import usersRepository from "../../repository/users";
 import { users } from "@prisma/client";
-
+import bcrypt from 'bcryptjs'
 
 class UserServiceImplementation implements IUserService{
     
@@ -12,11 +12,15 @@ class UserServiceImplementation implements IUserService{
     }
 
     public CreateUser = async(userData: users): Promise<users|any> =>{
-        if (userData == null || userData == undefined){
-            return{error:"data is required",status:400}
+        if (userData.password == null || userData.password == undefined){
+            return{error:"password is required",status:400}
         }else{
-            let response = await this.repository?.CreateUser(userData)
-            return response
+            let salt = await bcrypt.genSalt(10);
+            let password = await bcrypt.hash(userData.password, salt);
+            userData = JSON.parse(JSON.stringify(userData));
+            userData["password"] = password
+            let response = await this.repository?.CreateUser(userData as any) ;
+            return response 
         }
     }
 
@@ -24,8 +28,17 @@ class UserServiceImplementation implements IUserService{
         if(id == null || id == undefined){
             return {error:"id is required",status:400}
         }else{
-            let response = await this.repository?.UpdateUser(id,userData);
-            return response
+            if(userData.password == null || userData.password == undefined){
+                let data = await this.repository?.UpdateUser(id,userData as any);
+                return data               
+            }else{
+                let salt = await bcrypt.genSalt(10);
+                let password = await bcrypt.hash(userData.password, salt);
+                userData = JSON.parse(JSON.stringify(userData));
+                userData["password"] = password
+                let response = await this.repository?.UpdateUser(id,userData as any);
+                return response;
+            }
         }
     }
 
@@ -48,6 +61,23 @@ class UserServiceImplementation implements IUserService{
             return data
             
         }
+    }
+
+    public GetUserByName = async (name: string): Promise<users|any> =>{
+        if(name == null || name == undefined){
+            return {error:"name is required",status:400}
+        }else{
+            let response = await this.repository?.GetUserByName(name);
+            return response;
+        }
+    }
+    public GetUserByEmail = async(email: string): Promise<users|any>=> {
+        if(email == null || email == undefined){
+            return {error:"email is required",status:400}
+        }
+        let response = await this.repository?.GetUserByEmail;
+        return response as unknown as users
+       
     }
 
     public DeleteUser = async(id:string) :Promise<users|any> => {

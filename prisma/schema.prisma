@@ -127,9 +127,6 @@ model companies{
   phone String
   currency currency
   status String
-  discount_level_a Int
-  discount_level_b Int
-  discount_level_c Int
   is_deleted Boolean
   registered Boolean
   country_id Int
@@ -138,6 +135,7 @@ model companies{
   register_number String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  user users[]
 }
 
 model users{
@@ -147,8 +145,8 @@ model users{
   personal_title String
   work_title String
   email String
-  role_id String
-  company_id String
+  role_id String @unique
+  company_id String @unique
   status String
   mobile_phone String
   office_phone String
@@ -164,8 +162,6 @@ model users{
   accessFailedCount Int
   access_failed_restrict DateTime
   is_deleted Boolean
-  inviter_id String
-  inviter_type inviter_type
   approved_by String
   approved_date DateTime
   declined_by String
@@ -178,6 +174,9 @@ model users{
   zip_code String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  company companies @relation(fields: [company_id],references: [id])
+  role roles @relation(fields: [role_id],references: [id])
+
 }
 
 model roles{
@@ -187,6 +186,7 @@ model roles{
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   permission permissions @relation(fields: [permissionId],references: [id])
+  user users?
 }
 
 model permissions{

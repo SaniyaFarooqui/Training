@@ -1,6 +1,6 @@
 import ITraningService from "../interface/ITraining";
 import TrainingRepository from "../../repository/trainings";
-import { trainings } from "@prisma/client";
+import { $Enums, Prisma, trainings } from "@prisma/client";
 
 
 class trainingServiceImplementation implements ITraningService{
@@ -45,6 +45,17 @@ class trainingServiceImplementation implements ITraningService{
             return response
         }else{
             let data = {error:"id is required",status:400}
+            return data
+            
+        }
+    }
+
+    public GetTrainingByStatus  = async(status:$Enums.status|Prisma.EnumstatusFilter<"trainings">) :Promise< trainings|any > => {
+        if(status !== null ||status !== undefined){
+            let response = await this.repository?.GetTrainingByStatus(status);
+            return response
+        }else{
+            let data = {error:"status is required",status:400}
             return data
             
         }

@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import trainingServiceImplementation from "../service/implementation/trainingServiceImplementation";
 import { Request,response,Response } from "express";
 
@@ -54,7 +55,7 @@ class trainingsController{
                        let trainingResponse = await this.training_service.UpdateTraining(id,trainingData);
                        console.log(trainingResponse)
                        if(trainingResponse == null || trainingResponse == undefined){
-                           res.status(400).json({error : 'something went wrong please try again'})
+                           res.status(200).json({data:trainingResponse})
                        }else{
                        res.status(200).json({message : " updated training successfully"}) 
                        }
@@ -97,6 +98,24 @@ class trainingsController{
             }
         }
     
+    }
+
+    public GetTrainingByStatus =async(req:Request,res:Response)=>{
+        let status = req.query.status;
+        if(status == null || status == undefined){
+            res.status(404).json({error:"Please provide status"})
+        }else{
+            try {
+                let trainingResponse = await this.training_service.GetTrainingByStatus(status as Prisma.EnumstatusFilter)
+                if(trainingResponse == null || trainingResponse == undefined){
+                    res.status(400).json({error:"data not found"})
+                }else{
+                    res.status(200).json({data:trainingResponse})
+                }
+            } catch (error:any) {
+                res.status(400).json({error:error.message});
+            }
+        }
     }
 
     public GetAllTrainings =async(req:Request,res:Response)=>{

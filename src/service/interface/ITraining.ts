@@ -1,4 +1,4 @@
-import { trainings } from "@prisma/client";
+import { $Enums, trainings } from "@prisma/client";
  
 interface ITraningService{
 
@@ -9,6 +9,8 @@ interface ITraningService{
     GetAllTrainings(page:number,limit:number,keyword:string,filterBy:string):Promise<{count:number,rows:Array<trainings>}>
 
     GetTrainingById(id:string):Promise<trainings>
+
+    GetTrainingByStatus(status:$Enums.status):Promise<trainings>
     
     DeleteTraining(id:string):Promise<trainings>
 }

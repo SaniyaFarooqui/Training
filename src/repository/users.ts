@@ -7,28 +7,51 @@ class usersRepository{
     constructor(){
         this.prisma = new PrismaClient()
     }
-    public CreateUser = async(userData:users):Promise<users>=>{
+    public CreateUser = async(userData:users):Promise<users|any>=>{
         return await this.prisma.users.create({data:userData})
     }
-    public UpdateUser = async(id:string,userData:users):Promise<users>=>{
+    public UpdateUser = async(id:string,userData:users):Promise<users|any>=>{
         return await this.prisma.users.update({where:{id:id},data:userData})
     }
-    public GetAllUsers = async(page:number,limit:number,keyword:string,filterBy:string):Promise<{count:number,rows:Array<users>}>=>{
+    public GetAllUsers = async(page:number,limit:number,keyword:string,filterBy:string):Promise<{count:number,rows:Array<users>}|any>=>{
         let Users = await this.prisma.users.findMany({
             skip:page,
-            take:limit
+            take:limit,
+            include:{
+                company:true,
+                role:{
+                    include:{
+                        permission:true
+                    }
+                }
+            }
         })
         let count = await this.prisma.users.count()
         return {count:count,rows:Users}
     }
-    public GetUserById = async(id:string):Promise<users|null>=>{
+    public GetUserById = async(id:string):Promise<users|any>=>{
         return await this.prisma.users.findUnique({
             where:{
                 id:id
             }
         })
     }
-    public DeleteUser =async(id:string):Promise<users>=>{
+    public GetUserByName = async (name:string) :Promise<users| any > => {
+        return await this.prisma.users.findFirst({
+            where:{
+                name:name
+            }
+        })
+    }
+
+    public GetUserByEmail = async (email:string) :Promise<users|any> => {
+        return await this.prisma.users.findFirst({
+            where:{
+                email:email
+            }
+        })
+    }
+    public DeleteUser =async(id:string):Promise<users|any>=>{
         return await this.prisma.users.delete({
             where:{
                 id:id

@@ -32,4 +32,3 @@ export default interface schedule_training{
     createdAt ?:Date
     updatedAt ?:Date
 }
-

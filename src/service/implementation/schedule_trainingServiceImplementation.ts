@@ -49,6 +49,17 @@ class schedule_trainingServiceImplementation implements ISchedule_training{
         }
     }
 
+    public GetSchedule_trainingByUserAndTrainingId = async(user_id:string,training_id:string) :Promise< schedule_trainings|any > => {
+        if(user_id !== null ||user_id !== undefined || user_id !== ":id"|| training_id !== null || training_id !== undefined || training_id!==":id"){
+            let response = await this.repository?.GetSchedule_trainingByUserAndTrainingId(user_id,training_id);
+            return response
+        }else{
+            let data = {error:"id is required",status:400}
+            return data
+            
+        }
+    }
+
     public DeleteSchedule_training = async(id:string) :Promise<schedule_trainings|any> => {
         if(id == null || id == undefined){
             return {error:"id is required",status:400}

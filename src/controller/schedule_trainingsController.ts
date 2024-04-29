@@ -13,11 +13,16 @@ class schedule_trainingController {
             res.status(400).json({error:"Data not found please fill the data"})
         }else{
             try {
-                let schedule_trainingResponse = await this.Schedule_trainingService.CreateSchedule_training(schedule_trainingData)
-                if(schedule_trainingResponse == null || schedule_trainingResponse == undefined){
-                    res.status(400).json({error:"schedule_trainings not created please try again"})
+                let isExist = await this.Schedule_trainingService.GetSchedule_trainingByUserAndTrainingId(schedule_trainingData.user_id,schedule_trainingData.training_id)
+                if(isExist == null || isExist == undefined){
+                    let schedule_trainingResponse = await this.Schedule_trainingService.CreateSchedule_training(schedule_trainingData)
+                    if(schedule_trainingResponse == null || schedule_trainingResponse == undefined){
+                        res.status(400).json({error:"schedule_trainings not created please try again"})
+                    }else{
+                        res.status(200).json({message:"schedule_trainings created successfully"})
+                    }
                 }else{
-                    res.status(200).json({message:"schedule_trainings created successfully"})
+                    res.status(409).json({error:`You have already applied for this Training`});
                 }
             } catch (error:any) {
                 if(error.errors){
@@ -86,7 +91,7 @@ class schedule_trainingController {
             try {
                 let schedule_trainingResponse= await this.Schedule_trainingService.GetSchedule_trainingById(id);
                 if(schedule_trainingResponse == null || schedule_trainingResponse == undefined){
-                    res.status(400).json({error:"Something went wrong please try again"});
+                    res.status(200).json({data:schedule_trainingResponse});
                 }
                 else{
                     res.status(200).json({data: schedule_trainingResponse});
