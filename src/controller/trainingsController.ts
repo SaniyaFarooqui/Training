@@ -46,38 +46,38 @@ class trainingsController{
         let trainingData = req.body
         if(id == null || id == undefined){
             res.status(400).json({error:"invalid id"})
-           }else{
-               try {
-                   let isExist = await this.training_service.GetTrainingById(id);
-                   if(isExist == null || isExist == undefined){
-                       res.status(400).json({error: "please select training properly"})
-                   }else{
-                       let trainingResponse = await this.training_service.UpdateTraining(id,trainingData);
-                       console.log(trainingResponse)
-                       if(trainingResponse == null || trainingResponse == undefined){
-                           res.status(200).json({data:trainingResponse})
-                       }else{
-                       res.status(200).json({message : " updated training successfully"}) 
-                       }
-                   }
-               } catch ( error: any ) {
-                   if(error.errors){
-                       let validationerror : Array<object> = [];
-                       for await(let response of error.errors){
-                           let obj:{path : string , message : string}={
-                               path: "",
-                               message: ""
-                           }
-                           obj.path = response.path;
-                           obj.message = response.message;
-                           validationerror.push(obj);
-                       }
-                       res.status(400).json({errors:validationerror})
-                   }else{
-                       res.status(400).json({errors:error.message})
-                   }
-               }
-           }
+        }else{
+            try {
+                let isExist = await this.training_service.GetTrainingById(id);
+                if(isExist == null || isExist == undefined){
+                    res.status(400).json({error: "please select training properly"})
+                }else{
+                    let trainingResponse = await this.training_service.UpdateTraining(id,trainingData);
+                    console.log(trainingResponse)
+                    if(trainingResponse == null || trainingResponse == undefined){
+                        res.status(200).json({data:trainingResponse})
+                    }else{
+                    res.status(200).json({message : " updated training successfully"}) 
+                    }
+                }
+            } catch ( error: any ) {
+                if(error.errors){
+                    let validationerror : Array<object> = [];
+                    for await(let response of error.errors){
+                        let obj:{path : string , message : string}={
+                            path: "",
+                            message: ""
+                        }
+                        obj.path = response.path;
+                        obj.message = response.message;
+                        validationerror.push(obj);
+                    }
+                    res.status(400).json({errors:validationerror})
+                }else{
+                    res.status(400).json({errors:error.message})
+                }
+            }
+        }
     }
 
     public GetTrainingById =async(req:Request,res:Response)=>{
@@ -119,8 +119,8 @@ class trainingsController{
     }
 
     public GetAllTrainings =async(req:Request,res:Response)=>{
-        let page = req.query.page as unknown as number;
-        let limit = req.query.limit as unknown as number;
+        let page = Number(req.query.page)
+        let limit = Number(req.query.limit)
         let keyword  = req.query.keyword as string
         let filterBy = req.query.filterBy as string
         keyword = keyword == null || keyword == undefined ? "": keyword

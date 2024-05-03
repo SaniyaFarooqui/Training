@@ -103,6 +103,45 @@ class schedule_trainingController {
     
     }
 
+    public GetSchedule_trainingByTrainingId = async(req:Request,res:Response)=>{
+        let schedule_trainingData = req.body
+        if(schedule_trainingData == null || schedule_trainingData == undefined){
+            res.status(404).json({error:"please provide id"})
+        }else{
+            try {
+                let schedule_trainingResponse= await this.Schedule_trainingService.GetSchedule_trainingByTrainingId(schedule_trainingData.training_id);
+                if(schedule_trainingResponse == null || schedule_trainingResponse == undefined){
+                    res.status(200).json({data:schedule_trainingResponse});
+                }
+                else{
+                    res.status(200).json({data: schedule_trainingResponse});
+                }
+            } catch (error : any) {
+                res.status(400).json({error:error.message});
+            }
+        }
+    }
+
+    public GetSchedule_trainingBycompany_id = async(req:Request,res:Response)=>{
+        let schedule_trainingData = req.body;
+        console.log(schedule_trainingData)
+        if(schedule_trainingData == null || schedule_trainingData == undefined){
+            res.status(404).json({error:"please provide id"})
+        }else{
+            try {
+                let schedule_trainingResponse= await this.Schedule_trainingService.GetSchedule_trainingBycompany_id(schedule_trainingData.company_id);
+                if(schedule_trainingResponse == null || schedule_trainingResponse == undefined){
+                    res.status(200).json({data:schedule_trainingResponse});
+                }
+                else{
+                    res.status(200).json({data: schedule_trainingResponse});
+                }
+            } catch (error : any) {
+                res.status(400).json({error:error.message});
+            }
+        }
+    }
+
     public GetAllSchedule_trainings =async(req:Request,res:Response)=>{
         let page = req.query.page as unknown as number;
         let limit = req.query.limit as unknown as number;
@@ -110,7 +149,7 @@ class schedule_trainingController {
         let filterBy = req.query.filterBy as string
         keyword = keyword == null || keyword == undefined ? "": keyword
         try {
-            let schedule_trainingResponse :{count : number,rows:object[]} | {error ?: string ,status?:number } = await this.Schedule_trainingService.GetAllSchedule_trainings(page,limit,keyword,filterBy);
+            let schedule_trainingResponse :{count : number,rows:Array<schedule_trainingController>} | {error ?: string ,status?:number } = await this.Schedule_trainingService.GetAllSchedule_trainings(page,limit,keyword,filterBy);
             if(schedule_trainingResponse == null || schedule_trainingResponse == undefined){
                 res.status(400).json({error:"Something went wrong please try again"});
             }else{
@@ -120,6 +159,79 @@ class schedule_trainingController {
             res.status(400).json({error:error.message});
         }
     }
+
+    public GetAllApprovedSchedule_training = async(req:Request,res:Response)=>{
+        let page = req.query.page as unknown as number;
+        let limit = req.query.limit as unknown as number;
+        let keyword = req.query.keyword as string
+        keyword = keyword == null || keyword == undefined ? "": keyword
+        try {
+            let schedule_trainingData = await this.Schedule_trainingService.GetAllApprovedSchedule_trainings(page,limit,keyword)
+            if(schedule_trainingData == null || schedule_trainingData == undefined){
+                res.status(400).json({error:"Something went wrong please try again"});
+            }else{
+                res.status(200).json({data:schedule_trainingData});
+            }
+        } catch (error:any) {
+            res.status(400).json({error:error.message});
+        }
+
+    }
+
+    public GetAllRefusedSchedule_tranings = async(req:Request,res:Response)=>{
+        let page = req.query.page as unknown as number;
+        let limit = req.query.limit as unknown as number;
+        let keyword = req.query.keyword as string
+        keyword = keyword == null || keyword == undefined ? "": keyword
+        try {
+            let schedule_trainingData = await this.Schedule_trainingService.GetAllRefusedSchedule_tranings(page,limit,keyword)
+            if(schedule_trainingData == null || schedule_trainingData == undefined){
+                res.status(400).json({error:"Something went wrong please try again"});
+            }else{
+                res.status(200).json({data:schedule_trainingData});
+            }
+        } catch (error:any) {
+            res.status(400).json({error:error.message});
+        }
+
+    }
+
+    public GetAllRejectedSchedule_tranings = async(req:Request,res:Response)=>{
+        let page = req.query.page as unknown as number;
+        let limit = req.query.limit as unknown as number;
+        let keyword = req.query.keyword as string
+        keyword = keyword == null || keyword == undefined ? "": keyword
+        try {
+            let schedule_trainingData = await this.Schedule_trainingService.GetAllRejectedSchedule_tranings(page,limit,keyword)
+            if(schedule_trainingData == null || schedule_trainingData == undefined){
+                res.status(400).json({error:"Something went wrong please try again"});
+            }else{
+                res.status(200).json({data:schedule_trainingData});
+            }
+        } catch (error:any) {
+            res.status(400).json({error:error.message});
+        }
+
+    }
+
+    public GetAllCompletedSchedule_tranings = async(req:Request,res:Response)=>{
+        let page = req.query.page as unknown as number;
+        let limit = req.query.limit as unknown as number;
+        let keyword = req.query.keyword as string
+        keyword = keyword == null || keyword == undefined ? "": keyword
+        try {
+            let schedule_trainingData = await this.Schedule_trainingService.GetAllCompletedSchedule_tranings(page,limit,keyword)
+            if(schedule_trainingData == null || schedule_trainingData == undefined){
+                res.status(400).json({error:"Something went wrong please try again"});
+            }else{
+                res.status(200).json({data:schedule_trainingData});
+            }
+        } catch (error:any) {
+            res.status(400).json({error:error.message});
+        }
+
+    }
+
 
     public DeleteSchedule_training =async(req:Request,res:Response)=>{
         let id : string = req.params?.id;

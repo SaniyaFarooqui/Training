@@ -1,4 +1,4 @@
-import { schedule_trainings } from "@prisma/client";
+import { $Enums, schedule_trainings } from "@prisma/client";
 
 interface ISchedule_training{
 
@@ -10,7 +10,19 @@ interface ISchedule_training{
 
     GetSchedule_trainingById(id:string):Promise<schedule_trainings>
 
+    GetAllApprovedSchedule_trainings(page:number,limit:number,keyword:string):Promise<{count:number,rows:Array<schedule_trainings>}>
+
+    GetAllRefusedSchedule_tranings(page:number,limit:number,keyword:string):Promise<{count:number,rows:Array<schedule_trainings>}>
+
+    GetAllRejectedSchedule_tranings(page:number,limit:number,keyword:string):Promise<{count:number,rows:Array<schedule_trainings>}>
+
+    GetAllCompletedSchedule_tranings(page:number,limit:number,keyword:string):Promise<{count:number,rows:Array<schedule_trainings>}>
+
     GetSchedule_trainingByUserAndTrainingId(user_id:string,training_id:string):Promise<schedule_trainings>
+
+    GetSchedule_trainingByTrainingId(training_id:string):Promise<schedule_trainings>
+
+    GetSchedule_trainingBycompany_id(company_id:string):Promise<schedule_trainings>
 
     DeleteSchedule_training(id:string):Promise<schedule_trainings>
 }

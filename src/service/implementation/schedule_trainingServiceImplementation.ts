@@ -49,6 +49,47 @@ class schedule_trainingServiceImplementation implements ISchedule_training{
         }
     }
 
+    public GetAllApprovedSchedule_trainings = async(page:number,limit:number,keyword:string):Promise<{count:number,row:Array<schedule_trainings>}|any>=>{
+        if (page == null || page == undefined || limit == null || limit == undefined ){
+            page = 1;
+            limit = 10;
+        }
+        let offset = (page - 1) * limit;
+        let response = await this.repository?.GetAllApprovedSchedule_tranings(offset,limit,keyword);
+        return response;
+    }
+
+    public GetAllRefusedSchedule_tranings = async(page:number,limit:number,keyword:string):Promise<{count:number,row:Array<schedule_trainings>}|any>=>{
+        if (page == null || page == undefined || limit == null || limit == undefined ){
+            page = 1;
+            limit = 10;
+        }
+        let offset = (page - 1) * limit;
+        let response = await this.repository?.GetAllRefusedSchedule_tranings(offset,limit,keyword);
+        return response;
+    }
+
+    public GetAllRejectedSchedule_tranings = async(page:number,limit:number,keyword:string):Promise<{count:number,row:Array<schedule_trainings>}|any>=>{
+        if (page == null || page == undefined || limit == null || limit == undefined ){
+            page = 1;
+            limit = 10;
+        }
+        let offset = (page - 1) * limit;
+        let response = await this.repository?.GetAllRejectedSchedule_tranings(offset,limit,keyword);
+        return response;
+    }
+
+    public GetAllCompletedSchedule_tranings = async(page:number,limit:number,keyword:string):Promise<{count:number,row:Array<schedule_trainings>}|any>=>{
+        if (page == null || page == undefined || limit == null || limit == undefined ){
+            page = 1;
+            limit = 10;
+        }
+        let offset = (page - 1) * limit;
+        let response = await this.repository?.GetAllCompletedSchedule_tranings(offset,limit,keyword);
+        return response;
+    }
+
+
     public GetSchedule_trainingByUserAndTrainingId = async(user_id:string,training_id:string) :Promise< schedule_trainings|any > => {
         if(user_id !== null ||user_id !== undefined || user_id !== ":id"|| training_id !== null || training_id !== undefined || training_id!==":id"){
             let response = await this.repository?.GetSchedule_trainingByUserAndTrainingId(user_id,training_id);
@@ -60,6 +101,30 @@ class schedule_trainingServiceImplementation implements ISchedule_training{
         }
     }
 
+    public GetSchedule_trainingByTrainingId = async(training_id:string) :Promise< schedule_trainings|any > => {
+        if(training_id !== null || training_id !== undefined || training_id!==":id"){
+            let response = await this.repository?.GetSchedule_trainingByTrainingId(training_id);
+            return response
+        }else{
+            let data = {error:"id is required",status:400}
+            return data
+            
+        }
+    }
+
+    public GetSchedule_trainingBycompany_id = async(company_id:string) :Promise< schedule_trainings|any > => {
+        if(company_id !== null || company_id !== undefined || company_id!==":id"){
+            let response = await this.repository?.GetSchedule_trainingBycompany_id(company_id);
+            return response
+        }else{
+
+
+            let data = {error:"id is required",status:400}
+            return data
+            
+        }
+    }
+    
     public DeleteSchedule_training = async(id:string) :Promise<schedule_trainings|any> => {
         if(id == null || id == undefined){
             return {error:"id is required",status:400}
