@@ -18,7 +18,7 @@ class schedule_trainingsRepository{
     public GetAllSchedule_trainings = async(page:number, limit:number,keyword:string,filterBy:string):Promise<{count:number,rows:Array<schedule_trainings>}>=>{
         let schedule_training = await this.prisma.schedule_trainings.findMany({
             skip:page,
-            take:limit
+            take:limit,
         })
         let count = await this.prisma.schedule_trainings.count()
         return {count:count,rows:schedule_training}
@@ -49,11 +49,11 @@ class schedule_trainingsRepository{
     }
 
 
-    public GetSchedule_trainingBycompany_id = async(company_id:string) : Promise<schedule_trainings|null> =>{
+    public GetSchedule_trainingBycompany_id = async(id:string) : Promise<schedule_trainings|null> =>{
         return this.prisma.schedule_trainings.findFirst({
             where:{
-                company_id:company_id
-            }  
+                company_id:id
+            }
         })
     }
 

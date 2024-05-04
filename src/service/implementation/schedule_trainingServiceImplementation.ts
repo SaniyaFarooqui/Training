@@ -112,9 +112,9 @@ class schedule_trainingServiceImplementation implements ISchedule_training{
         }
     }
 
-    public GetSchedule_trainingBycompany_id = async(company_id:string) :Promise< schedule_trainings|any > => {
-        if(company_id !== null || company_id !== undefined || company_id!==":id"){
-            let response = await this.repository?.GetSchedule_trainingBycompany_id(company_id);
+    public GetSchedule_trainingBycompany_id = async(id:string) :Promise< schedule_trainings|any > => {
+        if(id !== null || id !== undefined || id!==":id"){
+            let response = await this.repository?.GetSchedule_trainingBycompany_id(id);
             return response
         }else{
 

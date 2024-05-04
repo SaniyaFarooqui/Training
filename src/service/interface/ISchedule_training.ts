@@ -22,7 +22,7 @@ interface ISchedule_training{
 
     GetSchedule_trainingByTrainingId(training_id:string):Promise<schedule_trainings>
 
-    GetSchedule_trainingBycompany_id(company_id:string):Promise<schedule_trainings>
+    GetSchedule_trainingBycompany_id(id:string):Promise<schedule_trainings>
 
     ApproveScheduleTrainingStatus(id:string):Promise<schedule_trainings>
 

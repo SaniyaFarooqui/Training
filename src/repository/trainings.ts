@@ -1,5 +1,6 @@
-import { $Enums, Prisma, PrismaClient } from "@prisma/client"
+import { $Enums, Prisma, PrismaClient, status } from "@prisma/client"
 import { trainings } from "@prisma/client/edge"
+import {training} from "../../types/training_types"
 
 class TrainingRepository{
     prisma: PrismaClient
@@ -16,13 +17,26 @@ class TrainingRepository{
         return await this.prisma.trainings.update({where:{id:id},data:trainingData})
     }
 
-    public GetAllTrainings = async(page:number,limit:number,keyword:string,filterBy:string) :Promise<{count:number,rows:Array<trainings>}> => {
+    public GetAllTrainings = async(page:number,limit:number,keyword:string,filterBy:status | $Enums.status) :Promise<{count:number,rows:trainings|Array<trainings>}> => {
         let Training = await this.prisma.trainings.findMany({
+            where:{
+                OR:[
+                {
+                    subject:{
+                        contains:keyword
+                    },
+                },
+                {
+                    details:{
+                        contains:keyword
+                    }
+                }
+            ],
+                status:filterBy,
+            },
             skip:page,
             take:limit,
-            include:{
-                scheduleTrainings:true
-            }
+            orderBy:{updatedAt:"desc"}
         })
         let count = await this.prisma.trainings.count()
         return {count:count,rows:Training}

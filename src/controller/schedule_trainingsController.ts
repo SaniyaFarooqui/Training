@@ -56,7 +56,6 @@ class schedule_trainingController {
                        res.status(400).json({error: "please select training properly"})
                    }else{
                        let schedule_trainingResponse = await this.Schedule_trainingService.UpdateSchedule_training(id,schedule_trainingData);
-                       console.log(schedule_trainingResponse)
                        if(schedule_trainingResponse == null || schedule_trainingResponse == undefined){
                            res.status(400).json({error : 'something went wrong please try again'})
                        }else{
@@ -104,12 +103,12 @@ class schedule_trainingController {
     }
 
     public GetSchedule_trainingByTrainingId = async(req:Request,res:Response)=>{
-        let schedule_trainingData = req.body
-        if(schedule_trainingData == null || schedule_trainingData == undefined){
+        let trainingId = req.params.trainingId
+        if(trainingId == null || trainingId == undefined){
             res.status(404).json({error:"please provide id"})
         }else{
             try {
-                let schedule_trainingResponse= await this.Schedule_trainingService.GetSchedule_trainingByTrainingId(schedule_trainingData.training_id);
+                let schedule_trainingResponse= await this.Schedule_trainingService.GetSchedule_trainingByTrainingId(trainingId);
                 if(schedule_trainingResponse == null || schedule_trainingResponse == undefined){
                     res.status(200).json({data:schedule_trainingResponse});
                 }
@@ -123,13 +122,12 @@ class schedule_trainingController {
     }
 
     public GetSchedule_trainingBycompany_id = async(req:Request,res:Response)=>{
-        let schedule_trainingData = req.body;
-        console.log(schedule_trainingData)
-        if(schedule_trainingData == null || schedule_trainingData == undefined){
+        let id = req.params.id;
+        if(id == null || id == undefined){
             res.status(404).json({error:"please provide id"})
         }else{
             try {
-                let schedule_trainingResponse= await this.Schedule_trainingService.GetSchedule_trainingBycompany_id(schedule_trainingData.company_id);
+                let schedule_trainingResponse= await this.Schedule_trainingService.GetSchedule_trainingBycompany_id(id);
                 if(schedule_trainingResponse == null || schedule_trainingResponse == undefined){
                     res.status(200).json({data:schedule_trainingResponse});
                 }

@@ -121,7 +121,6 @@ class RoleController{
         keyword = keyword == null || keyword == undefined ? "": keyword
         try {
             let roleResponse :{count : number,rows:object[]} | {error ?: string ,status?:number } = await this.role_service.GetAllRoles(page,limit,keyword,filterBy);
-            console.log(roleResponse)
             if(roleResponse == null || roleResponse == undefined){
                 res.status(200).json({data : roleResponse});
             }else{

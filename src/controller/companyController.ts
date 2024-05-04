@@ -107,7 +107,6 @@ class CompanyController{
         keyword = keyword == null || keyword == undefined ? "": keyword
         try {
             let CompanyResponse :{count : number,rows:object[]} | {error ?: string ,status?:number } = await this.Company_service.GetAllCompanies(page,limit,keyword,filterBy);
-            console.log(CompanyResponse)
             if(CompanyResponse == null || CompanyResponse == undefined || page == undefined || limit == undefined||page == null || limit == null){
                 res.status(200).json({data:CompanyResponse});
             }else{

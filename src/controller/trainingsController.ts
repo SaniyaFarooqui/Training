@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, status } from "@prisma/client";
 import trainingServiceImplementation from "../service/implementation/trainingServiceImplementation";
 import { Request,response,Response } from "express";
 
@@ -53,7 +53,6 @@ class trainingsController{
                     res.status(400).json({error: "please select training properly"})
                 }else{
                     let trainingResponse = await this.training_service.UpdateTraining(id,trainingData);
-                    console.log(trainingResponse)
                     if(trainingResponse == null || trainingResponse == undefined){
                         res.status(200).json({data:trainingResponse})
                     }else{
@@ -125,7 +124,7 @@ class trainingsController{
         let filterBy = req.query.filterBy as string
         keyword = keyword == null || keyword == undefined ? "": keyword
         try {
-            let trainingResponse :{count : number,rows:object[]} | {error ?: string ,status?:number } = await this.training_service.GetAllTrainings(page,limit,keyword,filterBy);
+            let trainingResponse :{count : number,rows:object[]} | {error ?: string ,status?:number } = await this.training_service.GetAllTrainings(page,limit,keyword,filterBy as status);
             if(trainingResponse == null || trainingResponse == undefined){
                 res.status(400).json({error:"Something went wrong please try again"});
             }else{
