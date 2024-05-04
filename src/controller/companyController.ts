@@ -100,8 +100,8 @@ class CompanyController{
         }
     }
     public GetAllCompanies = async (req : Request,res:Response) => {
-        let page = req.query.page as unknown as number;
-        let limit = req.query.limit as unknown as number;
+        let page = Number(req.query.page );
+        let limit = Number(req.query.limit);
         let keyword = req.query.keyword as string;
         let filterBy =req.query.filterBy as string;
         keyword = keyword == null || keyword == undefined ? "": keyword

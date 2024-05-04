@@ -1,6 +1,6 @@
 import ISchedule_training from "../interface/ISchedule_training";
 import schedule_trainingsRepository from "../../repository/schedule_trainings";
-import { $Enums, schedule_trainings } from "@prisma/client";
+import { $Enums, schedule_trainings, status } from "@prisma/client";
 
 
 class schedule_trainingServiceImplementation implements ISchedule_training{
@@ -122,6 +122,50 @@ class schedule_trainingServiceImplementation implements ISchedule_training{
             let data = {error:"id is required",status:400}
             return data
             
+        }
+    }
+
+    public ApproveScheduleTrainingStatus= async(id:string):Promise<schedule_trainings|any>=>{
+        if(id !== null||id !== undefined){
+            let data = await this.repository.ApproveScheduleTrainingStatus(id);
+            return data
+
+        }else{
+            let response = {error:"id is required",status:400}
+            return response
+        }
+    }
+
+    public RejectedScheduleTrainingStatus= async(id:string):Promise<schedule_trainings|any>=>{
+        if(id !== null||id !== undefined){
+            let data = await this.repository.RejectedScheduleTrainingStatus(id);
+            return data
+            
+        }else{
+            let response = {error:"id is required",status:400}
+            return response
+        }
+    }
+
+    public CompleteScheduleTrainingStatus= async(id:string):Promise<schedule_trainings|any>=>{
+        if(id !== null||id !== undefined){
+            let data = await this.repository.CompleteScheduleTrainingStatus(id);
+            return data
+            
+        }else{
+            let response = {error:"id is required",status:400}
+            return response
+        }
+    }
+
+    public RefuseScheduleTrainingStatus= async(id:string):Promise<schedule_trainings|any>=>{
+        if(id !== null||id !== undefined){
+            let data = await this.repository.RefuseScheduleTrainingStatus(id);
+            return data
+            
+        }else{
+            let response = {error:"id is required",status:400}
+            return response
         }
     }
     

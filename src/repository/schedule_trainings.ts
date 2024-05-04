@@ -110,6 +110,21 @@ class schedule_trainingsRepository{
         return data
     }
 
+    public RejectedScheduleTrainingStatus = async(id:string):Promise<schedule_trainings> =>{
+        let data = await this.prisma.schedule_trainings.update({where:{id:id},data:{status:"rejected"}});
+        return data
+    }
+
+    public CompleteScheduleTrainingStatus = async(id:string):Promise<schedule_trainings> =>{
+        let data = await this.prisma.schedule_trainings.update({where:{id:id},data:{status:"completed"}});
+        return data
+    }
+
+    public RefuseScheduleTrainingStatus = async(id:string):Promise<schedule_trainings> =>{
+        let data = await this.prisma.schedule_trainings.update({where:{id:id},data:{status:"refused"}});
+        return data
+    }
+
     public DeleteSchedule_training = async(id:string) => {
         return this.prisma.schedule_trainings.delete({where:{id:id}})
     }

@@ -24,6 +24,14 @@ interface ISchedule_training{
 
     GetSchedule_trainingBycompany_id(company_id:string):Promise<schedule_trainings>
 
+    ApproveScheduleTrainingStatus(id:string):Promise<schedule_trainings>
+
+    RejectedScheduleTrainingStatus(id:string):Promise<schedule_trainings>
+
+    CompleteScheduleTrainingStatus(id:string):Promise<schedule_trainings>
+
+    RefuseScheduleTrainingStatus(id:string):Promise<schedule_trainings>
+
     DeleteSchedule_training(id:string):Promise<schedule_trainings>
 }
 

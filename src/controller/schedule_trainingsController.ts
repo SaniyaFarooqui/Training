@@ -143,8 +143,8 @@ class schedule_trainingController {
     }
 
     public GetAllSchedule_trainings =async(req:Request,res:Response)=>{
-        let page = req.query.page as unknown as number;
-        let limit = req.query.limit as unknown as number;
+        let page = Number(req.query.page );
+        let limit = Number(req.query.limit);
         let keyword  = req.query.keyword as string
         let filterBy = req.query.filterBy as string
         keyword = keyword == null || keyword == undefined ? "": keyword
@@ -161,8 +161,8 @@ class schedule_trainingController {
     }
 
     public GetAllApprovedSchedule_training = async(req:Request,res:Response)=>{
-        let page = req.query.page as unknown as number;
-        let limit = req.query.limit as unknown as number;
+        let page = Number(req.query.page );
+        let limit = Number(req.query.limit);
         let keyword = req.query.keyword as string
         keyword = keyword == null || keyword == undefined ? "": keyword
         try {
@@ -179,8 +179,8 @@ class schedule_trainingController {
     }
 
     public GetAllRefusedSchedule_tranings = async(req:Request,res:Response)=>{
-        let page = req.query.page as unknown as number;
-        let limit = req.query.limit as unknown as number;
+        let page = Number(req.query.page );
+        let limit = Number(req.query.limit);
         let keyword = req.query.keyword as string
         keyword = keyword == null || keyword == undefined ? "": keyword
         try {
@@ -197,8 +197,8 @@ class schedule_trainingController {
     }
 
     public GetAllRejectedSchedule_tranings = async(req:Request,res:Response)=>{
-        let page = req.query.page as unknown as number;
-        let limit = req.query.limit as unknown as number;
+        let page = Number(req.query.page );
+        let limit = Number(req.query.limit);
         let keyword = req.query.keyword as string
         keyword = keyword == null || keyword == undefined ? "": keyword
         try {
@@ -215,8 +215,8 @@ class schedule_trainingController {
     }
 
     public GetAllCompletedSchedule_tranings = async(req:Request,res:Response)=>{
-        let page = req.query.page as unknown as number;
-        let limit = req.query.limit as unknown as number;
+        let page = Number(req.query.page );
+        let limit = Number(req.query.limit);
         let keyword = req.query.keyword as string
         keyword = keyword == null || keyword == undefined ? "": keyword
         try {
@@ -232,6 +232,81 @@ class schedule_trainingController {
 
     }
 
+    public ApproveScheduleTrainingStatus = async(req:Request,res:Response)=>{
+        let id = req.params.id;
+        if(id==null||id==undefined){
+            res.status(400).json({error:"id is required"})
+        }else{
+            try {
+                let response = await this.Schedule_trainingService.ApproveScheduleTrainingStatus(id)
+                if(response == 0){
+                    res.status(400).json({error:"couldnot update"})
+                }else{
+                    res.status(200).json({message:"approved updated successfully"})
+                }
+            } catch (error:any) {
+                res.status(400).json({error:error.message})
+            }
+        }
+        
+    }
+
+    public RejectedScheduleTrainingStatus = async(req:Request,res:Response)=>{
+        let id = req.params.id;
+        if(id==null||id==undefined){
+            res.status(400).json({error:"id is required"})
+        }else{
+            try {
+                let response = await this.Schedule_trainingService.RejectedScheduleTrainingStatus(id)
+                if(response == 0){
+                    res.status(400).json({error:"couldnot update"})
+                }else{
+                    res.status(200).json({message:"rejected updated successfully"})
+                }
+            } catch (error:any) {
+                res.status(400).json({error:error.message})
+            }
+        }
+        
+    }
+
+    public CompleteScheduleTrainingStatus = async(req:Request,res:Response)=>{
+        let id = req.params.id;
+        if(id==null||id==undefined){
+            res.status(400).json({error:"id is required"})
+        }else{
+            try {
+                let response = await this.Schedule_trainingService.CompleteScheduleTrainingStatus(id)
+                if(response == 0){
+                    res.status(400).json({error:"couldnot update"})
+                }else{
+                    res.status(200).json({message:"completed updated successfully"})
+                }
+            } catch (error:any) {
+                res.status(400).json({error:error.message})
+            }
+        }
+        
+    }
+
+    public RefuseScheduleTrainingStatus = async(req:Request,res:Response)=>{
+        let id = req.params.id;
+        if(id==null||id==undefined){
+            res.status(400).json({error:"id is required"})
+        }else{
+            try {
+                let response = await this.Schedule_trainingService.RefuseScheduleTrainingStatus(id)
+                if(response == 0){
+                    res.status(400).json({error:"couldnot update"})
+                }else{
+                    res.status(200).json({message:"refused updated successfully"})
+                }
+            } catch (error:any) {
+                res.status(400).json({error:error.message})
+            }
+        }
+        
+    }
 
     public DeleteSchedule_training =async(req:Request,res:Response)=>{
         let id : string = req.params?.id;

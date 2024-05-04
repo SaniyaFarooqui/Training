@@ -7,6 +7,10 @@ let schedule_trainingRouter :Router = Router();
 
 schedule_trainingRouter.post("/CreateSchedule_training",Schedule_trainingController.CreateSchedule_training)
 schedule_trainingRouter.put("/UpdateSchedule_training/:id",Schedule_trainingController.UpdateSchedule_training)
+schedule_trainingRouter.put("/ApproveScheduleTrainingStatus/:id",Schedule_trainingController.ApproveScheduleTrainingStatus)
+schedule_trainingRouter.put("/RejectedScheduleTrainingStatus/:id",Schedule_trainingController.RejectedScheduleTrainingStatus)
+schedule_trainingRouter.put("/CompleteScheduleTrainingStatus/:id",Schedule_trainingController.CompleteScheduleTrainingStatus)
+schedule_trainingRouter.put("/RefuseScheduleTrainingStatus/:id",Schedule_trainingController.RefuseScheduleTrainingStatus)
 schedule_trainingRouter.get("/GetAllSchedule_trainings",Schedule_trainingController.GetAllSchedule_trainings)
 schedule_trainingRouter.get("/GetAllApprovedSchedule_trainings",Schedule_trainingController.GetAllApprovedSchedule_training)
 schedule_trainingRouter.get("/GetAllRefusedSchedule_tranings",Schedule_trainingController.GetAllRefusedSchedule_tranings)
