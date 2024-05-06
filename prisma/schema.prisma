@@ -223,7 +223,7 @@ model certificates{
   updatedAt DateTime @updatedAt
 }
 
-model certificate_tempalates{
+model certificate_templates{
   id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name String
   html_code String

@@ -15,6 +15,17 @@ class usersRepository{
     }
     public GetAllUsers = async(page:number,limit:number,keyword:string,filterBy:string):Promise<{count:number,rows:Array<users>}|any>=>{
         let Users = await this.prisma.users.findMany({
+            where:{
+                OR:[
+                    {
+                        name:{
+                            contains:keyword
+                        }
+
+                    }
+                ],
+                surname:filterBy
+            },
             skip:page,
             take:limit,
             include:{

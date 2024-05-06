@@ -18,6 +18,16 @@ class CompaniesRepository{
 
     public GetAllCompanies = async(page:number,limit:number,keyword:string,filterBy:string):Promise<{count:number,rows:Array<companies>}>=>{
         let Company = await this.prisma.companies.findMany({
+            where:{
+                OR:[
+                    {
+                        name:{
+                            contains:keyword
+                        }
+                    }
+                ],
+                status:filterBy
+            },
             skip:page,
             take:limit,
         })

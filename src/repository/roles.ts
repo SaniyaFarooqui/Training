@@ -15,6 +15,16 @@ class rolesRepository{
     }
     public GetAllRoles = async(page:number,limit:number,keyword:string,filterBy:string):Promise<{count:number,rows:Array<roles>}>=>{
         let roles = await this.prisma.roles.findMany({
+            where:{
+                OR:[
+                    {
+                        name:{
+                            contains:keyword
+                        }
+                    }
+                ]
+                
+            },
             skip:page,
             take:limit,
             include:{
