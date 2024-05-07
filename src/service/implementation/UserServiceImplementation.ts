@@ -71,12 +71,15 @@ class UserServiceImplementation implements IUserService{
             return response;
         }
     }
+
     public GetUserByEmail = async(email: string): Promise<users|any>=> {
         if(email == null || email == undefined){
             return {error:"email is required",status:400}
+        }else{
+            let response = await this.repository?.GetUserByEmail(email);
+            return response as unknown as users
         }
-        let response = await this.repository?.GetUserByEmail;
-        return response as unknown as users
+        
        
     }
 

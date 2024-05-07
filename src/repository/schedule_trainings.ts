@@ -1,6 +1,6 @@
 import { $Enums, PrismaClient } from "@prisma/client";
 import { schedule_trainings } from "@prisma/client/edge";
-import { users } from "../model/users";
+import users from "./users";
 
 class schedule_trainingsRepository{
     prisma: PrismaClient;
@@ -19,6 +19,9 @@ class schedule_trainingsRepository{
         let schedule_training = await this.prisma.schedule_trainings.findMany({
             skip:page,
             take:limit,
+            include:{
+                user:true
+            }
         })
         let count = await this.prisma.schedule_trainings.count()
         return {count:count,rows:schedule_training}

@@ -1,5 +1,8 @@
+import jwt,{ JwtPayload } from "jsonwebtoken";
 import UserServiceImplementation from "../service/implementation/UserServiceImplementation";
 import { Request,Response } from "express";
+import bcrypt from 'bcryptjs'
+import data from "../../config";
 
 class UserController{
     user_service: UserServiceImplementation
@@ -43,6 +46,81 @@ class UserController{
             }
         }
     }
+    public LoginController = async(req : Request, res : Response) =>{
+        let {email,password} = req.body;
+        if(email == null || password == null||password == undefined || email == undefined){
+            res.status(401).json({errors :"please enter email or password"});
+        }else{
+            let isExist = await this.user_service.GetUserByEmail(email);
+            if(isExist == null){
+                res.status(400).json({error:"Account doesn't Exist"});
+            }else{
+                if(await bcrypt.compare(password,isExist.password)){
+                    let token = jwt.sign(
+                        { id: isExist.id },
+                        data.jwt_secret,
+                        { expiresIn: "1day" }
+
+                    )
+                    let refreshToken = jwt.sign(
+                        { id: isExist.id },
+                        data.jwt_secret,                        
+                        { expiresIn: "356d" }
+                      );
+                      res.cookie("refreshToken", refreshToken, {
+                        httpOnly: true,
+                        secure: true,
+                      })
+                      res.cookie("AccessToken", token, { httpOnly: true, secure: true });
+                      res.status(200).json({message :"login successful",user:isExist})
+                }else{
+                    res.status(400).json({error:"Invalid Password"});
+                }
+            }
+        }
+    };
+
+    public RefreshToken = async (req:Request, res:Response) => {
+        let refreshToken = req.params.token;
+        if (refreshToken == null || refreshToken == undefined) {
+          res.status(400).json({ error: "refresh token required" });
+        } else {
+          try {
+            let decode :{id:string}|JwtPayload = jwt.verify(refreshToken,data.jwt_secret as string) as{id:string};
+            console.log(decode)
+            if (decode == null || decode == undefined) {
+              res.status(400).json({ error: "invalid token" });
+            } else {
+              let userData = await this.user_service.GetUserById(decode.id)
+              if (userData == null || userData == undefined) {
+                res.status(400).json({ error: "invalid refresh token" });
+              } else {
+                let token = jwt.sign(
+                  { data :decode.id},
+                  data.jwt_secret as string,
+                  { expiresIn: "3days" }
+                );
+                res.cookie("AccessToken", token, { httpOnly: true, secure: true });
+                res.status(200).json({ AccessToken: token});
+              }
+            }
+          } catch (error:any) {
+            console.log(error)
+            res.status(400).json({ error: error.message });
+          }
+        }
+      };
+
+    public logoutController =(req: Request, res: Response)=>{
+        try {
+            res.cookie("AccessToken","",{maxAge:1});
+            res.cookie("refreshToken","",{maxAge:1});
+            res.status(200).json({message:"Logout successful"});
+        }catch (error:any) {
+            res.status(400).json({error:error});    
+        }
+    }
+    
     public UpdateUser = async(req:Request,res:Response)=>{
         let id = req.params.id
         let userData = req.body

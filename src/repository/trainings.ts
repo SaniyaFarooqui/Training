@@ -22,13 +22,13 @@ class TrainingRepository{
             where:{
                 OR:[
                 {
-                    subject:{
-                        contains:keyword
-                    },
+                    // subject:{
+                    //     contains:keyword
+                    // },
                 },
                 {
                     details:{
-                        contains:keyword
+                        startsWith:keyword
                     }
                 }
             ],

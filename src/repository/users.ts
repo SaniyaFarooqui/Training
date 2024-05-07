@@ -19,7 +19,8 @@ class usersRepository{
                 OR:[
                     {
                         name:{
-                            contains:keyword
+                            startsWith:keyword,
+                            mode:'insensitive'
                         }
 
                     }

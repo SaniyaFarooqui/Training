@@ -46,7 +46,7 @@ model trainings{
 model schedule_trainings{
   id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   trainingId String 
-  user_id String
+  user_id String @unique
   company_id String
   status schedule_training_status
   payment_status String @default("unpaid")
@@ -73,6 +73,7 @@ model schedule_trainings{
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   training trainings @relation(fields: [trainingId],references: [id])
+  user users @relation(fields: [user_id],references: [id])
 }
 model product_groups{
   id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -176,7 +177,7 @@ model users{
   updatedAt DateTime @updatedAt
   company companies @relation(fields: [company_id],references: [id])
   role roles @relation(fields: [role_id],references: [id])
-
+  schedule_training schedule_trainings?
 }
 
 model roles{
