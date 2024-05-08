@@ -1,6 +1,6 @@
 import ICertificateService from "../interface/ICertificate";
 import CertificatesRepository from "../../repository/certificates";
-import { certificates } from "@prisma/client";
+import { $Enums, certificates } from "@prisma/client";
 
 
 class CertificateServiceImplementation implements ICertificateService{
@@ -29,13 +29,13 @@ class CertificateServiceImplementation implements ICertificateService{
         }
     }
 
-    public GetAllCertificates = async(page:number,limit:number) :Promise<{count:number,rows:Array<certificates>}|any> => {
+    public GetAllCertificates = async(page:number,limit:number,keyword:string,filterBy: $Enums.certificate_status ) :Promise<{count:number,rows:Array<certificates>}|any> => {
         if(page == null || page == undefined || limit == null || limit == undefined || page == 0 || limit == 0){
             page = 1;
             limit = 10;
         }
         let offset = (page - 1) * limit;
-        let response = await this.repository?.GetAllCertificates(offset,limit);
+        let response = await this.repository?.GetAllCertificates(offset,limit,keyword,filterBy);
         return response;
     }
 

@@ -22,7 +22,8 @@ class CompaniesRepository{
                 OR:[
                     {
                         name:{
-                            contains:keyword
+                            contains:keyword,
+                            mode:'insensitive'
                         }
                     }
                 ],

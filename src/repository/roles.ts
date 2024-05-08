@@ -19,7 +19,8 @@ class rolesRepository{
                 OR:[
                     {
                         name:{
-                            contains:keyword
+                            contains:keyword,
+                            mode:'insensitive'
                         }
                     }
                 ]

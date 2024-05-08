@@ -6,7 +6,7 @@ interface ISchedule_training{
 
     UpdateSchedule_training(id: string,schedule_trainingData:schedule_trainings) : Promise<schedule_trainings>
 
-    GetAllSchedule_trainings(page:number,limit:number,keyword:string,filterBy:string):Promise<{count:number,rows:Array<schedule_trainings>}>
+    GetAllSchedule_trainings(page:number,limit:number,keyword:string,filterBy:$Enums.exam_result_status ):Promise<{count:number,rows:Array<schedule_trainings>}>
 
     GetSchedule_trainingById(id:string):Promise<schedule_trainings>
 

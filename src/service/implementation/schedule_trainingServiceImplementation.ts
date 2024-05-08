@@ -28,7 +28,7 @@ class schedule_trainingServiceImplementation implements ISchedule_training{
         }
     }
 
-    public GetAllSchedule_trainings = async(page:number,limit:number,keyword:string,filterBy:string) :Promise<{count:number,rows:Array<schedule_trainings>}|any> => {
+    public GetAllSchedule_trainings = async(page:number,limit:number,keyword:string,filterBy:$Enums.exam_result_status ) :Promise<{count:number,rows:Array<schedule_trainings>}|any> => {
         if(page == null || page == undefined || limit == null || limit == undefined || page == 0 || limit == 0){
             page = 1;
             limit = 10;

@@ -67,40 +67,57 @@ class Certificate_templateController{
     }
     public UpdateCertificate_template = async(req:Request,res:Response)=>{
         let id = req.params.id
-        let Certificate_templateData = req.body
         let file:Express.Multer.File | undefined= req.file
+        let errors:Array<string> = []
+        let Certificate_templateData = req.body
+        let base64string = file?.buffer as Buffer
+        let html_string = base64string.toString()
         if(id == null || id == undefined){
             res.status(400).json({error:"please provide id"})
+        }else if(file == null || file == undefined){
+            res.status(400).json({error:"Please select a template file"});
         }else{
-            try {
-                let isExist = await this.Certificate_template_service.GetCertificate_templateById(id)
-                if(isExist == null || isExist == undefined){
-                    res.status(400).json({error: "please select Certificate_template properly"})
-                }else{
-                    let Certificate_templateResponse = await this.Certificate_template_service.UpdateCertificate_template(id,Certificate_templateData)
-                    if(Certificate_templateResponse > 0 ){
-                        res.status(200).json({message: "updated successfully"})
-                    }else{
-                        res.status(400).json({error: "could not able to update"})
+            let variable = ["{{engineer}}","{{company}}","{{productModels}}","{{issueDate}}","{{validTo}}","{{certificateNumber}}","{{qrCode}}"]
+                for await(let data of variable){
+                    if(!html_string.includes(data)){
+                        errors.push(`${data} is not there in template file`);
                     }
                 }
-            } catch (error:any) {
-                if(error.errors){
-                    let validationerror = []
-                    for await(let response of error.errors){
-                        let obj :{path : string,message : string} = {
-                            path: "",
-                            message: ""
-                        };
-                        obj.path = response.path,
-                        obj.message = response.message
-                        validationerror.push(obj);
-                    }
-                    res.status(400).json({errors : validationerror});
+                if(errors.length > 0){
+                    res.status(400).json({error:errors});
                 }else{
-                    res.status(400).json({errors : error.message});
+                try {
+                    let isExist = await this.Certificate_template_service.GetCertificate_templateById(id)
+                    if(isExist == null || isExist == undefined){
+                        res.status(400).json({error: "please select Certificate_template properly"})
+                    }else{
+                        let data = {id,name:Certificate_templateData.name,html_code:html_string,filename:file?.originalname,encoding:file?.encoding,mimetype:file?.mimetype,size:file?.size,createdAt:new Date(),updatedAt:new Date()}
+                        let Certificate_templateResponse = await this.Certificate_template_service.UpdateCertificate_template(id,data)
+                        if(!Certificate_templateResponse){
+                            res.status(400).json({errors:"cannot update please try again"})
+                        }else{
+                            res.status(200).json({message: `${Certificate_templateResponse.name} updated successfully`})
+                        }
+                    }
+                } catch (error:any) {
+                    if(error.errors){
+                        let validationerror = []
+                        for await(let response of error.errors){
+                            let obj :{path : string,message : string} = {
+                                path: "",
+                                message: ""
+                            };
+                            obj.path = response.path,
+                            obj.message = response.message
+                            validationerror.push(obj);
+                        }
+                        res.status(400).json({errors : validationerror});
+                    }else{
+                        res.status(400).json({errors : error.message});
+                    }
                 }
             }
+            
         }
     }
     public GetCertificate_templateById = async (req : Request,res:Response) => {

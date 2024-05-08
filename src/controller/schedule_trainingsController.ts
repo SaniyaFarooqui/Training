@@ -1,3 +1,4 @@
+import { $Enums } from "@prisma/client";
 import Schedule_trainingServiceImplementation from "../service/implementation/schedule_trainingServiceImplementation"
 import { Request,Response } from "express";
 
@@ -144,7 +145,7 @@ class schedule_trainingController {
         let page = Number(req.query.page );
         let limit = Number(req.query.limit);
         let keyword  = req.query.keyword as string
-        let filterBy = req.query.filterBy as string
+        let filterBy = req.query.filterBy as $Enums.exam_result_status 
         keyword = keyword == null || keyword == undefined ? "": keyword
         try {
             let schedule_trainingResponse :{count : number,rows:Array<schedule_trainingController>} | {error ?: string ,status?:number } = await this.Schedule_trainingService.GetAllSchedule_trainings(page,limit,keyword,filterBy);

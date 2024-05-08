@@ -1,3 +1,4 @@
+import { $Enums } from "@prisma/client";
 import CertificateServiceImplementation from "../service/implementation/certificateServiceImplementation";
 import { Response,Request } from "express";
 
@@ -96,8 +97,11 @@ class CertificateController{
     public GetAllCertificates = async (req : Request,res:Response) => {
         let page = Number(req.query.page );
         let limit = Number(req.query.limit);
+        let keyword  = req.query.keyword as string
+        let filterBy = req.query.filterBy as $Enums.certificate_status 
+        keyword = keyword == null || keyword == undefined ? "": keyword
         try {
-            let CertificateResponse :{count : number,rows:object[]} | {error ?: string ,status?:number } = await this.Certificate_service.GetAllCertificates(page,limit);
+            let CertificateResponse :{count : number,rows:object[]} | {error ?: string ,status?:number } = await this.Certificate_service.GetAllCertificates(page,limit,keyword,filterBy);
             if(CertificateResponse == null || CertificateResponse == undefined || page == undefined || limit == undefined||page == null || limit == null){
                 res.status(200).json({data:CertificateResponse});
             }else{

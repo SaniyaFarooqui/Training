@@ -1,4 +1,4 @@
-import { certificates, PrismaClient } from "@prisma/client";
+import { $Enums, certificates, PrismaClient } from "@prisma/client";
 
 class certificateRepository{
     prisma:PrismaClient
@@ -15,8 +15,17 @@ class certificateRepository{
         return await this.prisma.certificates.update({where:{id:id},data:certificate_templateData})
     }
 
-    public GetAllCertificates = async(page:number,limit:number):Promise<{count:number,rows:Array<certificates>}>=>{
+    public GetAllCertificates = async(page:number,limit:number,keyword:string,filterBy: $Enums.certificate_status ):Promise<{count:number,rows:Array<certificates>}>=>{
         let certificate = await this.prisma.certificates.findMany({
+            where:{
+                OR:[{
+                    certificate_name:{
+                        contains:keyword,
+                        mode:'insensitive'
+                    }
+                }],
+                status:filterBy
+            },
             skip:page,
             take:limit
         })

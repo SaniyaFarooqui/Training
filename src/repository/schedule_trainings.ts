@@ -15,8 +15,17 @@ class schedule_trainingsRepository{
     public UpdateSchedule_training = async(id:string,schedule_trainingData:schedule_trainings):Promise<schedule_trainings>=>{
         return await this.prisma.schedule_trainings.update({where:{id:id},data:schedule_trainingData})
     }
-    public GetAllSchedule_trainings = async(page:number, limit:number,keyword:string,filterBy:string):Promise<{count:number,rows:Array<schedule_trainings>}>=>{
+    public GetAllSchedule_trainings = async(page:number, limit:number,keyword:string,filterBy:$Enums.exam_result_status ):Promise<{count:number,rows:Array<schedule_trainings>}>=>{
         let schedule_training = await this.prisma.schedule_trainings.findMany({
+            where:{
+                OR:[{
+                    payment_status:{
+                        contains:keyword,
+                        mode:'insensitive'
+                    }
+                }],
+                exam_result_status:filterBy
+            },
             skip:page,
             take:limit,
             include:{

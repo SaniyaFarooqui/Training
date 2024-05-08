@@ -1,4 +1,4 @@
-import { certificates } from "@prisma/client";
+import { $Enums, certificates } from "@prisma/client";
 
 
 interface ICertificateService{
@@ -7,7 +7,7 @@ interface ICertificateService{
 
     UpdateCertificate(id:string,certificateData:certificates):Promise<certificates>
 
-    GetAllCertificates(page:number,limit:number):Promise<{count:number,rows:Array<certificates>}>
+    GetAllCertificates(page:number,limit:number,keyword:string,filterBy: $Enums.certificate_status ):Promise<{count:number,rows:Array<certificates>}>
 
     GetCertificateById(id:string):Promise<certificates>
     
