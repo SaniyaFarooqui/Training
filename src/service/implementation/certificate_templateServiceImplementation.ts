@@ -39,6 +39,17 @@ class Certificate_templateServiceImplementation implements ICertificate_template
         return response;
     }
 
+    public GetCertificate_templateByName = async(name:string) :Promise< certificate_templates|any > => {
+        if(name !== null ||name !== undefined){
+            let response = await this.repository?.GetCertificate_templateByName(name)
+            return response
+        }else{
+            let data = {error:"id is required",status:400}
+            return data
+            
+        }
+    }
+
     public GetCertificate_templateById = async(id:string) :Promise< certificate_templates|any > => {
         if(id !== null ||id !== undefined || id !== ":id"){
             let response = await this.repository?.GetCertificate_templateById(id);

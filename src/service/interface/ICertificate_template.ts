@@ -9,6 +9,8 @@ interface ICertificate_templateService{
 
     GetAllCertificate_templates(page:number,limit:number):Promise<{count:number,rows:Array<certificate_templates>}>
 
+    GetCertificate_templateByName(name:string) :Promise< certificate_templates|any >
+
     GetCertificate_templateById(id:string):Promise<certificate_templates>
     
     DeleteCertificate_template(id:string):Promise<certificate_templates>

@@ -33,6 +33,14 @@ class certificate_templatesRepository{
         })
     }
 
+    public GetCertificate_templateByName = async(name:string):Promise<certificate_templates|null>=>{
+        return await this.prisma.certificate_templates.findFirst({
+            where:{
+                name:name
+            }
+        })
+    }
+
     public DeleteCertificate_template =async(id:string):Promise<certificate_templates>=>{
         return await this.prisma.certificate_templates.delete({
             where:{
