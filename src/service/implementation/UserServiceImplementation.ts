@@ -63,6 +63,16 @@ class UserServiceImplementation implements IUserService{
         }
     }
 
+    public GetUserByRoleId =async(role_id:string) :Promise< users|any > => {
+        if(role_id !== null ||role_id !== undefined || role_id !== ":id"){
+            let response = await this.repository?.GetUserByRoleId(role_id);
+            return response
+        }else{
+            let data = {error:"id is required",status:400}
+            return data
+            
+        }
+    }
     public GetUserByName = async (name: string): Promise<users|any> =>{
         if(name == null || name == undefined){
             return {error:"name is required",status:400}
@@ -81,6 +91,17 @@ class UserServiceImplementation implements IUserService{
         }
         
        
+    }
+    
+    public GetUserByCompanyId = async(page:number,limit:number,keyword:string,filterBy:string,company_id : string):Promise<{count:number,rows:Array<users>}|any>=>{
+        if(page == null || page == undefined || limit == null || limit == undefined || page == 0 || limit == 0||company_id == null && company_id == undefined){
+            page = 1;
+            limit = 10;
+        }else{
+            let offset = (page - 1) * limit;
+            let response = await this.repository?.GetUserByCompanyId(offset,limit,keyword,filterBy,company_id)
+            return response;
+        }
     }
 
     public DeleteUser = async(id:string) :Promise<users|any> => {

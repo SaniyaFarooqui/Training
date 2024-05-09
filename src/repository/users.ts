@@ -48,6 +48,13 @@ class usersRepository{
             }
         })
     }
+    public GetUserByRoleId = async(role_id:string):Promise<users|any>=>{
+        return await this.prisma.users.findFirst({
+            where:{
+                role_id:role_id
+            }
+        })
+    }
     public GetUserByName = async (name:string) :Promise<users| any > => {
         return await this.prisma.users.findFirst({
             where:{
@@ -62,6 +69,32 @@ class usersRepository{
                 email:email
             }
         })
+    }
+    public GetUserByCompanyId = async(page:number,limit:number,keyword:string,filterBy:string,company_id : string):Promise<{count:number,rows:Array<users>|any}>=>{
+        let users =  await this.prisma.users.findMany({
+            where:{
+                company_id:company_id,
+                OR:[{
+                    name:{
+                            contains:keyword,
+                            mode:'insensitive'
+                        }
+                    },
+                    {
+                        surname:{
+                            contains:keyword,
+                            mode:'insensitive'
+                        }
+                    }
+                ],
+                status:filterBy
+                
+            },
+            skip:page,
+            take:limit
+        })
+        let data = await this.prisma.users.count()
+        return {count:data,rows:users}
     }
     public DeleteUser =async(id:string):Promise<users|any>=>{
         return await this.prisma.users.delete({

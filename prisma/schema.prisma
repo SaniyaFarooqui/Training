@@ -147,7 +147,7 @@ model users{
   work_title String
   email String
   role_id String @unique
-  company_id String @unique
+  company_id String
   status String
   mobile_phone String
   office_phone String

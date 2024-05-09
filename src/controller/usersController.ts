@@ -18,11 +18,16 @@ class UserController{
             try {
                 let isExist = await this.user_service.GetUserByName(userData.name)
                 if(isExist == null || isExist == undefined){
-                    let userResponse = await this.user_service.CreateUser(userData) 
-                    if(userResponse == 0){
-                        res.status(400).json({error:"couldnot able to create please try again"})
+                    let roleExist = await this.user_service.GetUserByRoleId(userData.role_id)
+                    if(roleExist == null || roleExist == undefined){
+                        let userResponse = await this.user_service.CreateUser(userData) 
+                        if(userResponse == 0){
+                            res.status(400).json({error:"couldnot able to create please try again"})
+                        }else{
+                            res.status(200).json({message:"created successfully"})
+                        }
                     }else{
-                        res.status(200).json({message:"created successfully"})
+                        res.status(400).json({error:`${roleExist.name} Already exists please try different role`})
                     }
                 }else{
                     res.status(400).json({error:`${userData.name} already exists please try different name`})
@@ -190,6 +195,25 @@ class UserController{
                 res.status(200).json({data : userResponse});
             }
         } catch (error:any) {
+            res.status(400).json({error:error.message});
+        }
+    }
+    public GetUserByCompanyId = async(req:Request,res:Response)=>{
+        let company_id=req.params.company_id;
+        let page = Number(req.query.page );
+        let limit = Number(req.query.limit);
+        let keyword = req.query.keyword as string;
+        let filterBy =req.query.filterBy as string;
+        keyword = keyword == null || keyword == undefined ? "": keyword
+        try {
+            let userResponse= await this.user_service.GetUserByCompanyId(page,limit,keyword,filterBy,company_id);
+            if(userResponse == null || userResponse == undefined){
+                res.status(200).json({data:userResponse});
+            }
+            else{
+                res.status(200).json({data: userResponse});
+            }
+        } catch (error : any) {
             res.status(400).json({error:error.message});
         }
     }
