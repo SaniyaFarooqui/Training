@@ -17,7 +17,7 @@ datasource db {
 }
 
 model trainings{
-  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id String @id @unique @default(uuid()) @db.Uuid
   subject String
   details String 
   participant_fees Decimal
@@ -42,9 +42,11 @@ model trainings{
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   scheduleTrainings schedule_trainings[]
+  product_model_trainings product_model_trainings[]
+  product_group_trainings product_group_trainings[]
 }
 model schedule_trainings{
-  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id String @id @unique @default(uuid()) @db.Uuid
   trainingId String 
   user_id String @unique
   company_id String
@@ -76,43 +78,53 @@ model schedule_trainings{
   user users @relation(fields: [user_id],references: [id])
 }
 model product_groups{
-  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id String @id @unique @default(uuid()) @db.Uuid
   name String
   description String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  product_group_trainings product_group_trainings[]
+  product_models product_models[]
+
 }
 
 model product_group_trainings{
-  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id String @id @unique @default(uuid()) @db.Uuid
   approvalCertificateId String
   product_group_id String
+  training_id String
   product_group_name String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  product_group product_groups @relation(fields: [product_group_id],references: [id])
+  training trainings @relation(fields:[training_id ], references: [id])
 }
 
 model product_models{
-  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id String @id @unique @default(uuid()) @db.Uuid
   product_group_id String
   name String
   description String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  product_model_trainings product_model_trainings[]
+  product_group product_groups @relation(fields: [product_group_id],references: [id])
 }
 
 
 model  product_model_trainings{
-  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id String @id @unique @default(uuid()) @db.Uuid
   training_id String
   product_group_id String
   product_model_id String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  training trainings @relation(fields: [training_id],references: [id])
+  product_model product_models @relation(fields: [product_model_id],references: [id])
 } 
 
 model companies{
-  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id String @id @unique @default(uuid()) @db.Uuid
   admin_confirmation String
   profile_image String
   banner_image String
@@ -140,7 +152,7 @@ model companies{
 }
 
 model users{
-  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id String @id @unique @default(uuid()) @db.Uuid
   name String
   surname String
   personal_title String
@@ -181,7 +193,7 @@ model users{
 }
 
 model roles{
-  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id String @id @unique @default(uuid()) @db.Uuid
   name String
   permissionId String @unique
   createdAt DateTime @default(now())
@@ -191,7 +203,7 @@ model roles{
 }
 
 model permissions{
-  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id String @id @unique @default(uuid()) @db.Uuid
   create Boolean
   update Boolean
   edit Boolean
@@ -203,7 +215,7 @@ model permissions{
 }
 
 model certificates{
-  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id String @id @unique @default(uuid()) @db.Uuid
   training_id String
   certificate_name String
   certificate_no String
@@ -225,7 +237,7 @@ model certificates{
 }
 
 model certificate_templates{
-  id String @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id String @id @unique @default(uuid()) @db.Uuid
   name String
   html_code String
   filename String

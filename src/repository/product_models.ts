@@ -19,7 +19,10 @@ class product_modelsRepository{
     public GetAllProduct_models = async(page:number,limit:number):Promise<{count:number,rows:Array<product_models>}>=>{
         let product_models = await this.prisma.product_models.findMany({
             skip:page,
-            take:limit
+            take:limit,
+            include:{
+                product_group:true
+            }
         })
         let count = await this.prisma.product_models.count()
         return {count:count,rows:product_models}

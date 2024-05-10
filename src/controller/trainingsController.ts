@@ -1,6 +1,7 @@
 import { Prisma, status } from "@prisma/client";
 import trainingServiceImplementation from "../service/implementation/trainingServiceImplementation";
 import { Request,response,Response } from "express";
+import {trainings} from "../model/trainings"
 
 class trainingsController{
     training_service: trainingServiceImplementation
@@ -15,11 +16,16 @@ class trainingsController{
             res.status(400).json({error:"Data not found please fill the data"})
         }else{
             try {
-                let trainingResponse = await this.training_service.CreateTraining(trainingData)
-                if(trainingResponse == null || trainingResponse == undefined){
-                    res.status(400).json({error:"training not created please try again"})
+                let trainingValues :trainings = await this.CreateTrainingData(trainingData);
+                if(trainingValues){
+                    let trainingResponse = await this.training_service.CreateTraining(trainingValues)
+                    if(trainingResponse == null || trainingResponse == undefined){
+                        res.status(400).json({error:"training not created please try again"})
+                    }else{
+                        res.status(200).json({message:"Training created successfully"})
+                    }
                 }else{
-                    res.status(200).json({message:"Training created successfully"})
+                    res.status(400).json({error:"Cannot createTraining please try again"})
                 }
             } catch (error:any) {
                 if(error.errors){
@@ -190,7 +196,33 @@ class trainingsController{
         }
     }
 
+    private CreateTrainingData = async (trainingData:trainings) => {
+        let training = {
+            subject : trainingData.subject ,
+            details : trainingData.details,
+            startDate : trainingData.startDate,
+            endDate   : trainingData.endDate,
+            participant_fees:trainingData.participant_fees,
+            currency :trainingData.currency,
+            free_cancellation : trainingData.free_cancellation,
+            late_cancellation_rate :trainingData.late_cancellation_rate,
+            language :trainingData.language,
+            type : trainingData.type,
+            limit :trainingData.limit,
+            certification_expration_time :trainingData.certification_expration_time,
+            training_leader :trainingData.training_leader,
+            exam_pass_rate :trainingData.exam_pass_rate,
+            assesment_required :trainingData.assesment_required,
+            published :trainingData.published,
+            status :trainingData.status,
+            photo :trainingData.photo,
+            country :trainingData.country,
+            state :trainingData.state,
+            city :trainingData.city,
 
+        }
+        return training;
+    }
 
 }
 export default trainingsController

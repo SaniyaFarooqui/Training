@@ -1,8 +1,9 @@
-import { $Enums, status, trainings } from "@prisma/client";
+import { $Enums, status } from "@prisma/client";
+import { trainings } from "../../model/trainings";
  
 interface ITraningService{
 
-    CreateTraining(trainingData: trainings):Promise<trainings>
+    CreateTraining(trainingData: trainings): Promise<trainings|undefined|{error:"data is required",status:400}>
 
     UpdateTraining(id:string,trainingData:trainings):Promise<trainings>
 

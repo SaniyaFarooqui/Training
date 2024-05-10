@@ -2,7 +2,7 @@ import { Decimal } from "@prisma/client/runtime/library"
 import schedule_trainings from "./schedule_training"
 
 export default interface trainings{
-  id ?: string 
+  id ?: string
   subject ?: string | undefined
   details ?: string | undefined
   participant_fees ?: Decimal | undefined
@@ -30,7 +30,7 @@ export default interface trainings{
 }
 
 export type training = {
-  id ?: string 
+  id ?: string | undefined
   subject ?: string | undefined
   details ?: string | undefined
   participant_fees ?: Decimal | undefined

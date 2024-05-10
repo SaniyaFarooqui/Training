@@ -1,6 +1,7 @@
 import ITraningService from "../interface/ITraining";
 import TrainingRepository from "../../repository/trainings";
-import { $Enums, Prisma, status, trainings } from "@prisma/client";
+import { $Enums, Prisma, status,} from "@prisma/client";
+import { trainings } from "../../model/trainings";
 
 
 class trainingServiceImplementation implements ITraningService{
@@ -11,7 +12,7 @@ class trainingServiceImplementation implements ITraningService{
         this.repository = new TrainingRepository()
     }
 
-    public CreateTraining = async(trainingData: trainings): Promise<trainings|any> =>{
+    public CreateTraining = async(trainingData: trainings): Promise<trainings|undefined|{error:"data is required",status:400}> =>{
         if (trainingData == null || trainingData == undefined){
             return{error:"data is required",status:400}
         }else{

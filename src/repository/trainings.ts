@@ -1,6 +1,5 @@
 import { $Enums, Prisma, PrismaClient, status } from "@prisma/client"
-import { trainings } from "@prisma/client/edge"
-import {training} from "../../types/training_types"
+import {trainings} from "../model/trainings"
 
 class TrainingRepository{
     prisma: PrismaClient
