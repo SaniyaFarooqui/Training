@@ -2,9 +2,8 @@ import jwt,{ JwtPayload } from "jsonwebtoken";
 import UserServiceImplementation from "../service/implementation/UserServiceImplementation";
 import { Request,Response } from "express";
 import bcrypt from 'bcryptjs'
-import fs from 'fs'
 import data from "../../config";
-import { Readable } from "nodemailer/lib/xoauth2";
+
 
 class UserController{
     user_service: UserServiceImplementation
@@ -16,50 +15,25 @@ class UserController{
     }
     public CreateUser = async(req:Request,res:Response)=>{
         let userData =req.body
-        let profile_image = req.file
         if(userData.name == null || userData.name == undefined || userData.email== undefined|| userData.email == null || userData.password == null || userData.password == undefined){
             res.status(400).json({error:"please provide the data"})
-        }else if(profile_image == null || profile_image == undefined){
-            res.status(400).json({error:"Please select a template file"});
         }else{
             try {
                 let isExist = await this.user_service.GetUserByName(userData.name)
                 if(isExist == null || isExist == undefined){
-                    let roleExist = await this.user_service.GetUserByRoleId(userData.role_id)
-                        if(roleExist == null || roleExist == undefined){
-                            let userResponse = await this.user_service.CreateUser(userData) 
-                            if(userResponse == 0){
-                                res.status(400).json({error:"couldnot able to create please try again"})
-                            }else{
-                                res.status(200).json({message:"created successfully"})
-                            }
+                let roleExist = await this.user_service.GetUserByRoleId(userData.role_id)
+                    if(roleExist == null || roleExist == undefined){
+                        let userResponse = await this.user_service.CreateUser(userData) 
+                        if(userResponse == 0){
+                            res.status(400).json({error:"couldnot able to create please try again"})
                         }else{
-                            res.status(400).json({error:`${roleExist.name} Already exists please try different role`})
-                        }
-                    if(profile_image.mimetype?.split("/")[1] == "jpg" || profile_image.mimetype?.split("/")[1] == "png" || profile_image.mimetype?.split("/")[1] == "jpeg"){
-                        let stream = Readable.from(profile_image.buffer as Buffer);
-                        let filename = profile_image.originalname?.replaceAll(" ","_");
-                        let filePath = `${this.destination}/${filename?.split(".")[0]+"_"+this.getTimeStamp()+"."+filename?.split(".")[1]}`
-                        let writer = fs.createWriteStream(filePath);
-                        stream.pipe(writer);
-                        let url = `${process.env.server}/${filePath}`
-                        userData["profile_image"] = url;
-                        let roleExist = await this.user_service.GetUserByRoleId(userData.role_id)
-                        if(roleExist == null || roleExist == undefined){
-                            let userResponse = await this.user_service.CreateUser(userData) 
-                            if(userResponse == 0){
-                                res.status(400).json({error:"couldnot able to create please try again"})
-                            }else{
-                                res.status(200).json({message:"created successfully"})
-                            }
-                        }else{
-                            res.status(400).json({error:`${roleExist.name} Already exists please try different role`})
+                            res.status(200).json({message:"created successfully"})
                         }
                     }else{
-                        res.status(400).json({error:"Please Select either png or jpg or jpeg file"});
+                        res.status(400).json({error:`${roleExist.name} Already exists please try different role`})
                     }
                 }else{
-                    res.status(400).json({error:`${userData.name} already exists please try different name`})
+                    res.status(400).json({error:"Please Select either png or jpg or jpeg file"});
                 }
             } catch (error:any) {
                 if(error.errors){

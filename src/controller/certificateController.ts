@@ -111,6 +111,42 @@ class CertificateController{
             res.status(400).json({error:error.message});
         }
     }
+    public GetCertificateByUserId = async(req:Request,res:Response)=>{
+        let userId = req.params.userId
+        if(userId == null || userId == undefined){
+            res.status(400).json({error:"please provide userid"})
+        }else{
+            try {
+                let certificateData = await this.Certificate_service.GetCertificateByUserId(userId)
+                if(certificateData == null || certificateData == undefined){
+                    res.status(400).json({error:"No Certificate Exists"}); 
+                }else{
+                    res.status(200).json({data: certificateData});
+                }
+            } catch (error:any) {
+                res.status(400).json({error:error.message})
+            }
+        }
+    }
+
+    public GetCertificateByCompanyId = async(req:Request,res:Response)=>{
+        let company_id = req.params.company_id
+        if(company_id == null || company_id == undefined){
+            res.status(400).json({error:"please provide userid"})
+        }else{
+            try {
+                let certificateData = await this.Certificate_service.GetCertificateByCompanyId(company_id)
+                if(certificateData == null || certificateData == undefined){
+                    res.status(400).json({error:"No Certificate Exists"}); 
+                }else{
+                    res.status(200).json({data: certificateData});
+                }
+            } catch (error:any) {
+                res.status(400).json({error:error.message})
+            }
+        }
+    }
+
     public DeleteCertificate = async(req:Request,res:Response)=>{
         let id = req.params.id
         if(id == null || id == undefined){

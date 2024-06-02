@@ -41,6 +41,22 @@ class certificateRepository{
         })
     }
 
+    public GetCertificateByUserId = async(userId:string):Promise<certificates|null>=>{
+        return await this.prisma.certificates.findFirst({
+            where:{
+                user_id:userId
+            }
+        })
+    }
+
+    public GetCertificateByCompanyId = async(company_id:string):Promise<certificates|null>=>{
+        return await this.prisma.certificates.findFirst({
+            where:{
+                company_id:company_id
+            }
+        })
+    }
+
     public DeleteCertificate =async(id:string):Promise<certificates>=>{
         return await this.prisma.certificates.delete({
             where:{

@@ -10,6 +10,10 @@ interface ICertificateService{
     GetAllCertificates(page:number,limit:number,keyword:string,filterBy: $Enums.certificate_status ):Promise<{count:number,rows:Array<certificates>}>
 
     GetCertificateById(id:string):Promise<certificates>
+
+    GetCertificateByUserId(userId:string):Promise<certificates>
+
+    GetCertificateByCompanyId(company_id:string):Promise<certificates>
     
     DeleteCertificate(id:string):Promise<certificates>
 }

@@ -1,6 +1,6 @@
 import ICertificateService from "../interface/ICertificate";
 import CertificatesRepository from "../../repository/certificates";
-import { $Enums, certificates } from "@prisma/client";
+import { $Enums, certificates, status } from "@prisma/client";
 
 
 class CertificateServiceImplementation implements ICertificateService{
@@ -47,6 +47,24 @@ class CertificateServiceImplementation implements ICertificateService{
             let data = {error:"id is required",status:400}
             return data
             
+        }
+    }
+
+    public GetCertificateByUserId = async(userId:string):Promise<certificates|any>=>{
+        if(userId == null || userId == undefined ){
+            return {error : "userid is required",status:400}
+        }else{
+            let response = await this.repository?.GetCertificateByUserId(userId)
+            return response
+        }
+    }
+
+    public GetCertificateByCompanyId = async(company_id:string):Promise<certificates|any>=>{
+        if(company_id == null || company_id == undefined ){
+            return {error : "userid is required",status:400}
+        }else{
+            let response = await this.repository?.GetCertificateByCompanyId(company_id)
+            return response
         }
     }
 

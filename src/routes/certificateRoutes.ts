@@ -9,6 +9,8 @@ CertificateRouter.post("/CreateCertificate",certificateController.CreateCertific
 CertificateRouter.put("/UpdateCertificate/:id",certificateController.UpdateCertificate)
 CertificateRouter.get("/GetAllCertificates",certificateController.GetAllCertificates)
 CertificateRouter.get("/GetCertificateById/:id",certificateController.GetCertificateById)
+CertificateRouter.get("/GetCertificateByUserId/:userId",certificateController.GetCertificateByUserId)
+CertificateRouter.get("/GetCertificateByCompanyId/:company_id",certificateController.GetCertificateByCompanyId)
 CertificateRouter.delete("/DeleteCertificate/:id",certificateController.DeleteCertificate)
 CertificateRouter.delete("/BulkDeleteCertificates",certificateController.BulkDeleteCertificates)
 
