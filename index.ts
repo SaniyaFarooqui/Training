@@ -16,7 +16,7 @@ import CertificateRouter from "./src/routes/certificateRoutes";
 
 dotenv.config()
 let app = express()
-let port = 5000
+let port = 5001
 
 app.use(cors());
 app.use(bodyParser());

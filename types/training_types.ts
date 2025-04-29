@@ -8,19 +8,19 @@ export default interface trainings{
   participant_fees ?: Decimal | undefined
   currency :string | undefined
   free_cancellation ?:Date | undefined
-  late_cancellation_rate ?:number | undefined
+  late_cancellation_rate ?:string | undefined 
   language ?:string | undefined
   type ?:string | undefined
-  limit ?:number | undefined
+  limit ?:string | undefined
   startDate ?:Date | undefined
   endDate ?:Date | undefined
   certification_expration_time?: Date | undefined
   training_leader ?:string | undefined
-  exam_pass_rate ?:number | undefined
+  exam_pass_rate ?:string | undefined
   assesment_required ?: Boolean | undefined
   published ?:Boolean | undefined
   status ?:string | undefined
-  photo ?:string | undefined
+  photo ?:File| undefined
   country ?:string | undefined
   state ?:string | undefined
   city ?:string | undefined

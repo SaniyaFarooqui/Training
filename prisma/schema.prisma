@@ -23,17 +23,17 @@ model trainings{
   participant_fees Decimal
   currency String
   free_cancellation DateTime
-  late_cancellation_rate Int
+  late_cancellation_rate String
   language String
   type String
-  limit Int
+  limit String
   startDate DateTime
   endDate DateTime
   certification_expration_time DateTime
   training_leader String
-  exam_pass_rate Int
-  assesment_required Boolean
-  published Boolean
+  exam_pass_rate String
+  assesment_required String
+  published String
   status status
   photo String
   country String

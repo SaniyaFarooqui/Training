@@ -2,9 +2,16 @@ import { Prisma, status } from "@prisma/client";
 import trainingServiceImplementation from "../service/implementation/trainingServiceImplementation";
 import { Request,response,Response } from "express";
 import {trainings} from "../model/trainings"
+import { Readable } from "stream";
+import fs, { writeFile, writeFileSync } from 'fs';
+import { FileChangeInfo } from "fs/promises";
 
 class trainingsController{
+    
     training_service: trainingServiceImplementation
+    
+    public destination: string = "src/upload"
+
 
     constructor(){
         this.training_service = new trainingServiceImplementation();
@@ -12,23 +19,49 @@ class trainingsController{
 
     public CreateTraining = async(req:Request,res:Response)=>{
         let trainingData = req.body
+        let photo:any  = req.file;
+        console.log(photo)
         if(trainingData == null || trainingData == undefined){
             res.status(400).json({error:"Data not found please fill the data"})
         }else{
             try {
                 let trainingValues :trainings = await this.CreateTrainingData(trainingData);
                 if(trainingValues){
-                    let trainingResponse = await this.training_service.CreateTraining(trainingValues)
-                    if(trainingResponse == null || trainingResponse == undefined){
-                        res.status(400).json({error:"training not created please try again"})
+                    if(photo == null||photo == undefined){
+                        let trainingResponse: any = await this.training_service.CreateTraining(trainingData);
+                        if(trainingResponse == null || trainingResponse == undefined){
+                            res.status(400).json({error:"training not created please try again"})
+                        }else{
+                            res.status(200).json({message:"Training created successfully"})
+                        }
+                        
                     }else{
-                        res.status(200).json({message:"Training created successfully"})
-                    }
+                        if(photo.mimetype?.split("/")[1] == "jpg" || photo.mimetype?.split("/")[1] == "png" || photo.mimetype?.split("/")[1] == "jpeg"){
+                            let stream = Readable.from(photo.buffer as Buffer);
+                            let filename = photo.originalname?.replaceAll(" ","_");
+                            let filePath = `${this.destination}/${filename?.split(".")[0]+"_"+this.getTimeStamp()+"."+filename?.split(".")[1]}`
+                            let writer = fs.createWriteStream(filePath);
+                            stream.pipe(writer);
+                            let url = `${process.env.server}/${filePath}`
+                            console.log(url)
+                            trainingData["photo"] = url;
+                            let response :any = this.training_service.CreateTraining(trainingData);
+                            if(response.error && response.status){
+                                res.status(400).json({error:response.error})
+                            }else{
+                                res.status(200).json({message:"Created training Successfully"})
+                            }
+                        }else{
+                            res.status(400).json({error:"Please Select either png or jpg or jpeg file"});    
+                        }
+                    }   
                 }else{
                     res.status(400).json({error:"Cannot createTraining please try again"})
                 }
             } catch (error:any) {
+                console.log(error)
                 if(error.errors){
+                
                     let validationerror = []
                     for await(let response of error.errors){
                         let obj :{path : string,message : string} = {
@@ -222,6 +255,10 @@ class trainingsController{
 
         }
         return training;
+    }
+    
+    private getTimeStamp = () =>{
+        return Math.floor(Date.now() / 1000)
     }
 
 }
