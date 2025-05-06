@@ -1,12 +1,17 @@
-import multer from "multer";
+
 import UserController from "../controller/usersController";
 import { Router } from "express";
+import multer = require("multer");
+
+let upload = multer({
+    storage:multer.memoryStorage()
+})
 
 
 let userController= new UserController();
 let UserRouter :Router = Router();
 
-UserRouter.post("/CreateUser",userController.CreateUser)
+UserRouter.post("/CreateUser",upload.single("profile_image"),userController.CreateUser)
 UserRouter.post("/LoginController",userController.LoginController)
 UserRouter.post("/RefreshToken/:token",userController.RefreshToken)
 UserRouter.put("/UpdateUser/:id",userController.UpdateUser)

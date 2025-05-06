@@ -1,10 +1,10 @@
 import { Prisma, status } from "@prisma/client";
 import trainingServiceImplementation from "../service/implementation/trainingServiceImplementation";
-import { Request,response,Response } from "express";
+import { Request,Response } from "express";
 import {trainings} from "../model/trainings"
 import { Readable } from "stream";
-import fs, { writeFile, writeFileSync } from 'fs';
-import { FileChangeInfo } from "fs/promises";
+import fs  from 'fs';
+
 
 class trainingsController{
     
@@ -33,8 +33,7 @@ class trainingsController{
                             res.status(400).json({error:"training not created please try again"})
                         }else{
                             res.status(200).json({message:"Training created successfully"})
-                        }
-                        
+                        } 
                     }else{
                         if(photo.mimetype?.split("/")[1] == "jpg" || photo.mimetype?.split("/")[1] == "png" || photo.mimetype?.split("/")[1] == "jpeg"){
                             let stream = Readable.from(photo.buffer as Buffer);

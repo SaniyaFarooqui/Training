@@ -30,9 +30,11 @@ app.use("/api/product_model",Product_modelRouter)
 app.use("/api/product_group",Product_groupRouter)
 app.use("/api/certificate_template",Certificate_templateRouter)
 app.use("/api/Certificate",CertificateRouter)
+app.use("/src/upload",express.static("src/upload"))
 const server = app.listen(port,()=>{
     console.log(`Server is accesssing on port : ${port}`);
 })
+
 
 process.on('SIGTERM', () => {
     server.close(() => {

@@ -3,6 +3,9 @@ import UserServiceImplementation from "../service/implementation/UserServiceImpl
 import { Request,Response } from "express";
 import bcrypt from 'bcryptjs'
 import data from "../../config";
+import { Readable } from "stream";
+import fs from 'fs';
+import { users } from "@prisma/client";
 
 
 class UserController{
@@ -15,26 +18,61 @@ class UserController{
     }
     public CreateUser = async(req:Request,res:Response)=>{
         let userData =req.body
+        console.log(userData)
+        let profile_image=req.file
+        console.log(profile_image);
         if(userData.name == null || userData.name == undefined || userData.email== undefined|| userData.email == null || userData.password == null || userData.password == undefined){
             res.status(400).json({error:"please provide the data"})
         }else{
             try {
-                let isExist = await this.user_service.GetUserByName(userData.name)
-                if(isExist == null || isExist == undefined){
-                let roleExist = await this.user_service.GetUserByRoleId(userData.role_id)
-                    if(roleExist == null || roleExist == undefined){
-                        let userResponse = await this.user_service.CreateUser(userData) 
-                        if(userResponse == 0){
-                            res.status(400).json({error:"couldnot able to create please try again"})
+                let UserVaule = await this.CreateUserData(userData)
+                if(UserVaule){
+                    if(profile_image == null||profile_image == undefined){
+                        let userResponse: any = await this.user_service.CreateUser(userData);
+                        if(userResponse == null || userResponse == undefined){
+                            res.status(400).json({error:"user not created please try again"})
                         }else{
-                            res.status(200).json({message:"created successfully"})
-                        }
+                            res.status(200).json({message:"user created successfully"})
+                        } 
+                }else{
+                    let isExist = await this.user_service.GetUserByEmail(userData.email)
+                    if(isExist == null || isExist == undefined){
+                        if(profile_image == null || profile_image == undefined){
+                            let roleExist = await this.user_service.GetUserByRoleId(userData.role_id)
+                            if(roleExist == null || roleExist == undefined){
+                                let userResponse = await this.user_service.CreateUser(userData) 
+                                if(userResponse == 0){
+                                    res.status(400).json({error:"couldnot able to create please try again"})
+                                }else{
+                                    res.status(200).json({message:"created successfully"})
+                                }
+                            }else{
+                                res.status(400).json({error:`${roleExist.name} Already exists please try different role`})
+                            }
                     }else{
-                        res.status(400).json({error:`${roleExist.name} Already exists please try different role`})
+                        if(profile_image.mimetype?.split("/")[1] == "jpg" || profile_image.mimetype?.split("/")[1] == "png" || profile_image.mimetype?.split("/")[1] == "jpeg"){
+                            let stream = Readable.from(profile_image.buffer as Buffer);
+                            let filename = profile_image.originalname?.replaceAll(" ","_");
+                            let filePath = `${this.destination}/${filename?.split(".")[0]+"_"+this.getTimeStamp()+"."+filename?.split(".")[1]}`
+                            let writer = fs.createWriteStream(filePath);
+                            stream.pipe(writer);
+                            let url = `${process.env.server}/${filePath}`
+                            userData["profile_image"] = url;
+                            let response :any = this.user_service.CreateUser(userData);
+                            if(response.error && response.status){
+                                res.status(400).json({error:response.error})
+                            }else{
+                                res.status(200).json({message:"Created User Successfully"})
+                            }
+                        }else{
+                            res.status(400).json({error:"Please Select either png or jpg or jpeg file"});    
+                        }
                     }
                 }else{
-                    res.status(400).json({error:"Please Select either png or jpg or jpeg file"});
+                    res.status(400).json({error:"user not created"});
                 }
+            }
+        }
             } catch (error:any) {
                 if(error.errors){
                     let validationerror = []
@@ -273,6 +311,43 @@ class UserController{
             }
         }
     
+    }
+    private CreateUserData = async (userData:users)=>{
+        let user ={
+            name :userData.name,
+            surname: userData.surname,
+            personal_title :userData.personal_title,
+            work_title: userData.work_title,
+            email :userData.email,
+            role_id :userData.role_id,
+            company_id :userData.company_id,
+            status: userData.status,
+            mobile_phone: userData.mobile_phone,
+            office_phone :userData.office_phone,
+            profile_image :userData.profile_image,
+            password: userData.password,
+            TwoFactorAuthentication: userData.TwoFactorAuthentication,
+            TwoFactorForced :userData.TwoFactorForced,
+            TwoFactorAuthenticationSecret :userData.TwoFactorAuthenticationSecret,
+            emailConfirmed :userData.emailConfirmed,
+            address :userData.address,
+            adminConfirmed: userData.adminConfirmed,
+            registered :userData.registered,
+            accessFailedCount :userData.accessFailedCount,
+            access_failed_restrict: userData.access_failed_restrict,
+            is_deleted :userData.is_deleted,
+            approved_by :userData.approved_by,
+            approved_date: userData.approved_date,
+            declined_by :userData.declined_by,
+            declined_date: userData.declined_date,
+            country_id : userData.country_id,
+            state_id: userData.state_id,
+            type: userData.type,
+            city_id :userData.city_id,
+            date_of_birth :userData.date_of_birth,
+            zip_code :userData.zip_code
+        }
+        return user;
     }
     private getTimeStamp = () =>{
         return Math.floor(Date.now() / 1000)
