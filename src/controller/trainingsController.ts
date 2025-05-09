@@ -44,11 +44,12 @@ class trainingsController{
                             let url = `${process.env.server}/${filePath}`
                             console.log(url)
                             trainingData["photo"] = url;
-                            let response :any = this.training_service.CreateTraining(trainingData);
+                            let response :any = await  this.training_service.CreateTraining(trainingData);
+                            console.log(response)
                             if(response.error && response.status){
                                 res.status(400).json({error:response.error})
                             }else{
-                                res.status(200).json({message:"Created training Successfully"})
+                                res.status(200).json({message:"Created training Successfully",response})
                             }
                         }else{
                             res.status(400).json({error:"Please Select either png or jpg or jpeg file"});    
@@ -177,6 +178,7 @@ class trainingsController{
         let id : string = req.params?.id;
         try {
             let trainingResponse = await this.training_service.DeleteTraining(id);
+            console.log(trainingResponse)
             if(trainingResponse == null || trainingResponse == undefined){
                 res.status(400).json({error:"Something went wrong please try again"});
             }else if (trainingResponse.error || trainingResponse.status == 400){
