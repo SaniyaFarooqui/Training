@@ -8,10 +8,10 @@ import fs from 'fs';
 import { users } from "@prisma/client";
 
 
+
 class UserController{
     user_service: UserServiceImplementation
 
-    public destination: string ="src/upload"
 
     constructor(){
         this.user_service= new UserServiceImplementation();
@@ -19,60 +19,42 @@ class UserController{
     public CreateUser = async(req:Request,res:Response)=>{
         let userData =req.body
         console.log(userData)
-        let profile_image=req.file
+        let destination = "src/upload/users"
+        let profile_image : File[] | { [fieldname: string]: File[]; } | any = req.file
         console.log(profile_image);
         if(userData.name == null || userData.name == undefined || userData.email== undefined|| userData.email == null || userData.password == null || userData.password == undefined){
             res.status(400).json({error:"please provide the data"})
         }else{
             try {
-                let UserVaule = await this.CreateUserData(userData)
-                if(UserVaule){
-                    if(profile_image == null||profile_image == undefined){
-                        let userResponse: any = await this.user_service.CreateUser(userData);
-                        if(userResponse == null || userResponse == undefined){
-                            res.status(400).json({error:"user not created please try again"})
-                        }else{
-                            res.status(200).json({message:"user created successfully"})
-                        } 
-                }else{
-                    let isExist = await this.user_service.GetUserByEmail(userData.email)
-                    if(isExist == null || isExist == undefined){
-                        if(profile_image == null || profile_image == undefined){
-                            let roleExist = await this.user_service.GetUserByRoleId(userData.role_id)
-                            if(roleExist == null || roleExist == undefined){
-                                let userResponse = await this.user_service.CreateUser(userData) 
-                                if(userResponse == 0){
-                                    res.status(400).json({error:"couldnot able to create please try again"})
-                                }else{
-                                    res.status(200).json({message:"created successfully"})
-                                }
-                            }else{
-                                res.status(400).json({error:`${roleExist.name} Already exists please try different role`})
-                            }
+                let userValue = await this.CreateUserData(userData);
+                let isExist = await this.user_service.GetUserByEmail(userData.email);
+                if(isExist == null || isExist == undefined){
+                    if(userValue.role_id == null || userValue.role_id == undefined){
+                        res.status(400).json({error:"Please select role for user"});
                     }else{
                         if(profile_image.mimetype?.split("/")[1] == "jpg" || profile_image.mimetype?.split("/")[1] == "png" || profile_image.mimetype?.split("/")[1] == "jpeg"){
                             let stream = Readable.from(profile_image.buffer as Buffer);
                             let filename = profile_image.originalname?.replaceAll(" ","_");
-                            let filePath = `${this.destination}/${filename?.split(".")[0]+"_"+this.getTimeStamp()+"."+filename?.split(".")[1]}`
+                            let filePath = `${destination}/${filename?.split(".")[0]+"_"+this.getTimeStamp()+"."+filename?.split(".")[1]}`
                             let writer = fs.createWriteStream(filePath);
                             stream.pipe(writer);
                             let url = `${process.env.server}/${filePath}`
-                            userData["profile_image"] = url;
-                            let response :any = this.user_service.CreateUser(userData);
-                            if(response.error && response.status){
-                                res.status(400).json({error:response.error})
-                            }else{
+                            userValue["profile_image"] = url;
+                            let response  = await this.user_service.CreateUser(userValue);
+                            if(response){
                                 res.status(200).json({message:"Created User Successfully"})
+                            }else{
+                                res.status(400).json({error:"user cannot be created"})
                             }
                         }else{
                             res.status(400).json({error:"Please Select either png or jpg or jpeg file"});    
                         }
+                        
                     }
                 }else{
-                    res.status(400).json({error:"user not created"});
+                    res.status(400).json({error:`User with email ${userData.email} already exist`});
                 }
-            }
-        }
+                
             } catch (error:any) {
                 if(error.errors){
                     let validationerror = []
@@ -170,40 +152,90 @@ class UserController{
     public UpdateUser = async(req:Request,res:Response)=>{
         let id = req.params.id
         let userData = req.body
+        console.log(userData)
+        let profile_image  = req.file ;
+        let destination = "src/upload/users"
         if(id == null || id == undefined){
             res.status(400).json({error:"please provide id"})
         }else{
             try {
+                let userValue = await this.CreateUserData(userData)
                 let isExist = await this.user_service.GetUserById(id)
                 if(isExist == null || isExist == undefined){
                     res.status(400).json({error: "please select user properly"})
                 }else{
-                    let userResponse = await this.user_service.UpdateUser(id,userData)
-                    if(userResponse > 0 ){
-                        res.status(200).json({message: "updated successfully"})
+                    if(profile_image == null || profile_image == undefined){
+                        let data  :[affectedcount :number]= await this.user_service.UpdateUser(id,userValue);       
+                        if(data){
+                            res.status(200).json({message:"Updated Successfully"});
+                        }else{
+                            res.status(400).json({error:"Cannot update please try again"});
+                        }
+                                                
                     }else{
-                        res.status(400).json({error: "could not able to update"})
+                        if(isExist.profile_image == null || isExist.profile_image == undefined){
+                            if(profile_image.originalname?.split(".")[1] == "jpeg"||profile_image.originalname?.split(".")[1] == "png"||profile_image.originalname?.split(".")[1] == "jpg"){
+                                let streamData = Readable.from(profile_image.buffer as Buffer);
+                                let filename = profile_image.originalname?.replaceAll(" ","_");
+                                let filePath = `${destination}/${filename?.split(".")[0]+"_"+this.getTimeStamp()+"."+filename?.split(".")[1]}`
+                                let writer = fs.createWriteStream(filePath);
+                                streamData.pipe(writer);
+                                userValue["profile_image"] = `${process.env.server}/${filePath}`
+                                let data :{error?:string,status:400}|[affectedCount?:number]|undefined = await this.user_service.UpdateUser(id,userValue);       
+                                if(data instanceof Array){
+                                    if(typeof data == "number"){
+                                        if(data > 0){
+                                            res.status(200).json({message:"Updated Successfully"});
+                                        }else{
+                                            res.status(400).json({error:"Cannot update please try again"});
+                                        }
+                                    }
+                                }else{
+                                    res.status(400).json({error:"user not updated please try again"})
+                                }
+                            }else{
+                                res.status(400).json({error_message:"Plese select either png or jpeg or jpg file format"})
+                            }
+                        }else{
+                            let existingImagePathParts = isExist.profile_image.split("/");
+                            let filenameData = existingImagePathParts[existingImagePathParts.length - 1];
+                            fs.rmSync(`${destination}/${filenameData}`);
+                            let streamData = Readable.from((req.file as Express.Multer.File).buffer);
+                            let filename = req.file?.originalname?.replaceAll(" ","_");
+                            let filePath = `${destination}/${filename?.split(".")[0]+"_"+this.getTimeStamp()+"."+filename?.split(".")[1]}`
+                            let writer = fs.createWriteStream(filePath);
+                            streamData.pipe(writer);
+                            userValue["profile_image"] = `${process.env.server}/${filePath}`
+                            let data :{error?:string,status:400}|[affectedCount?:number]|undefined = await this.user_service.UpdateUser(id,userValue); 
+                                if(data){
+                                    res.status(200).json({message:"Updated Successfully"});
+                                }else{
+                                    res.status(400).json({error:"Cannot update please try again"});
+                                }
+                        }
                     }
                 }
-            } catch (error:any) {
+            }catch(error : any){
+                console.log(error);
                 if(error.errors){
-                    let validationerror = []
+                    let validationerror : Array<object> = [];
                     for await(let response of error.errors){
-                        let obj :{path : string,message : string} = {
+                        let obj:{path : string , message : string}={
                             path: "",
                             message: ""
-                        };
-                        obj.path = response.path,
-                        obj.message = response.message
+                        }
+                        obj.path = response.path;
+                        obj.message = response.message;
                         validationerror.push(obj);
                     }
-                    res.status(400).json({errors : validationerror});
+                    res.status(400).json({errors:validationerror})
                 }else{
-                    res.status(400).json({errors : error.message});
+                    res.status(400).json({errors:error.message})
                 }
-            }
+            } 
         }
     }
+    
     public GetUserById = async (req : Request,res:Response) => {
         let id = req.params.id;
         if(id == null || id == undefined){
@@ -314,6 +346,7 @@ class UserController{
     }
     private CreateUserData = async (userData:users)=>{
         let user ={
+            id:userData.id,
             name :userData.name,
             surname: userData.surname,
             personal_title :userData.personal_title,
@@ -326,26 +359,29 @@ class UserController{
             office_phone :userData.office_phone,
             profile_image :userData.profile_image,
             password: userData.password,
-            TwoFactorAuthentication: userData.TwoFactorAuthentication,
-            TwoFactorForced :userData.TwoFactorForced,
+            TwoFactorAuthentication: Boolean(userData.TwoFactorAuthentication),
+            TwoFactorForced :Boolean(userData.TwoFactorForced),
             TwoFactorAuthenticationSecret :userData.TwoFactorAuthenticationSecret,
-            emailConfirmed :userData.emailConfirmed,
+            emailConfirmed :Boolean(userData.emailConfirmed),
             address :userData.address,
             adminConfirmed: userData.adminConfirmed,
-            registered :userData.registered,
-            accessFailedCount :userData.accessFailedCount,
-            access_failed_restrict: userData.access_failed_restrict,
-            is_deleted :userData.is_deleted,
+            registered :Boolean(userData.registered),
+            accessFailedCount :Number(userData.accessFailedCount),
+            access_failed_restrict: new Date(userData.access_failed_restrict),
+            is_deleted :Boolean(userData.is_deleted),
             approved_by :userData.approved_by,
-            approved_date: userData.approved_date,
+            approved_date: new Date(userData.approved_date),
             declined_by :userData.declined_by,
-            declined_date: userData.declined_date,
-            country_id : userData.country_id,
-            state_id: userData.state_id,
+            declined_date: new Date(userData.declined_date),
+            country_id :Number(userData.country_id) ,
+            state_id: Number(userData.state_id),
             type: userData.type,
-            city_id :userData.city_id,
-            date_of_birth :userData.date_of_birth,
-            zip_code :userData.zip_code
+            city_id :Number(userData.city_id),
+            date_of_birth :new Date(userData.date_of_birth),
+            zip_code :userData.zip_code,
+            createdAt :userData.createdAt,
+            updatedAt :userData.updatedAt
+            
         }
         return user;
     }

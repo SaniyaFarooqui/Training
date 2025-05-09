@@ -1,4 +1,5 @@
 
+import { profile } from "console";
 import UserController from "../controller/usersController";
 import { Router } from "express";
 import multer = require("multer");
@@ -14,7 +15,7 @@ let UserRouter :Router = Router();
 UserRouter.post("/CreateUser",upload.single("profile_image"),userController.CreateUser)
 UserRouter.post("/LoginController",userController.LoginController)
 UserRouter.post("/RefreshToken/:token",userController.RefreshToken)
-UserRouter.put("/UpdateUser/:id",userController.UpdateUser)
+UserRouter.put("/UpdateUser/:id",upload.single("profile_image"),userController.UpdateUser)
 UserRouter.get("/GetAllUsers",userController.GetAllUsers)
 UserRouter.get("/GetUserByCompanyId/:company_id",userController.GetUserByCompanyId)
 UserRouter.get("/GetUserById/:id",userController.GetUserById)
