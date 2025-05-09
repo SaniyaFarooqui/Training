@@ -1,25 +1,37 @@
-import { Prisma, status } from "@prisma/client";
+import { Prisma,status } from "@prisma/client";
 import trainingServiceImplementation from "../service/implementation/trainingServiceImplementation";
 import { Request,Response } from "express";
 import {trainings} from "../model/trainings"
 import { Readable } from "stream";
 import fs  from 'fs';
-
+import Product_groupServiceImplementation from "../service/implementation/product_groupServiceImplementation";
+import { product_groups } from "../model/product_groups";
+import Product_group_trainingServiceImplementation from "../service/implementation/product_group_trainingServiceImplementation";
+import { product_groupTrainings } from "../model/product_groupTrainings";
 
 class trainingsController{
     
     training_service: trainingServiceImplementation
-    
+    product_group_service: Product_groupServiceImplementation;
+    product_group_training_service : Product_group_trainingServiceImplementation;
+
     public destination: string = "src/upload"
-
-
+    
+    
     constructor(){
         this.training_service = new trainingServiceImplementation();
+        this.product_group_service = new Product_groupServiceImplementation()
+        this.product_group_training_service = new Product_group_trainingServiceImplementation()
     }
 
     public CreateTraining = async(req:Request,res:Response)=>{
         let trainingData = req.body
         let photo:any  = req.file;
+        let success :Array<string> = []
+        let errors :Array<string> = []
+        
+        //how product_group_training is coming
+        console.log(trainingData.product_group_training)
         console.log(photo)
         if(trainingData == null || trainingData == undefined){
             res.status(400).json({error:"Data not found please fill the data"})
@@ -44,11 +56,39 @@ class trainingsController{
                             let url = `${process.env.server}/${filePath}`
                             console.log(url)
                             trainingData["photo"] = url;
-                            let response :any = this.training_service.CreateTraining(trainingData);
+                            let response :trainings|undefined|{error:"data is required",status:400} = this.training_service.CreateTraining(trainingData);
                             if(response.error && response.status){
                                 res.status(400).json({error:response.error})
                             }else{
-                                res.status(200).json({message:"Created training Successfully"})
+                                let product_group_training = JSON.parse(trainingData.product_group_training)
+                                if(Array.isArray(trainingData.product_group_training)){
+                                    for (let product of product_group_training){
+                                        let validate :product_groups = await this.product_group_service.GetProduct_groupById(product);
+                                        if(validate != null || validate != undefined){
+                                            let data = {
+                                                training_id : response.id,
+                                                product_group_id : product,
+                                                product_group_name : validate.name
+                                            }
+                                            let cratedData : product_groupTrainings = await this.product_group_training_service.CreateProduct_group_training(data);
+                                            if(cratedData){
+                                                success.push(`${validate.name} product group has been created`);
+                                            }else{
+                                                errors.push(`${validate.name} product group has not created`);    
+                                            }
+                                        }
+                                    }
+                                }
+                                if(errors.length > 0 && success.length == 0){
+                                    let deleteTraining = await this.training_service.DeleteTraining(response.id);
+                                    if(deleteTraining){
+                                        res.status(400).json({errors:errors,message:"Some product group or product model didnt exist please select properly"});
+                                    }
+                                }else if(success.length > 0 && errors.length == 0){
+                                    res.status(200).json({message:`${response.subject} created successfully` });
+                                }else{
+                                    res.status(400).json({errors:errors,message:"Some product group or product model didnt exist please select properly"});
+                                }
                             }
                         }else{
                             res.status(400).json({error:"Please Select either png or jpg or jpeg file"});    
