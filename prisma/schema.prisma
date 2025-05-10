@@ -88,17 +88,18 @@ model product_groups{
 
 }
 
-model product_group_trainings{
-  id String @id @unique @default(uuid()) @db.Uuid
-  approvalCertificateId String
-  product_group_id String
-  training_id String
-  product_group_name String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  product_group product_groups @relation(fields: [product_group_id],references: [id])
-  training trainings @relation(fields:[training_id ], references: [id])
+model product_group_trainings {
+  id                 String      @id @unique @default(uuid()) @db.Uuid
+  product_group_id   String?     
+  training_id        String?     
+  product_group_name String?     
+  createdAt          DateTime?   @default(now())
+  updatedAt          DateTime?   @updatedAt
+
+  product_group      product_groups? @relation(fields: [product_group_id], references: [id])
+  training           trainings?      @relation(fields: [training_id], references: [id])
 }
+
 
 model product_models{
   id String @id @unique @default(uuid()) @db.Uuid

@@ -11,7 +11,7 @@ class Product_group_trainingServiceImplementation implements IProduct_group_trai
         this.repository = new product_group_trainingsRepository()
     }
 
-    public CreateProduct_group_training = async(Product_group_trainingData: product_group_trainings): Promise<product_group_trainings|any> =>{
+    public CreateProduct_group_training = async(Product_group_trainingData: product_group_trainings): Promise<product_group_trainings | { error: string; status: number }| undefined> =>{
         if (Product_group_trainingData == null || Product_group_trainingData == undefined){
             return{error:"data is required",status:400}
         }else{

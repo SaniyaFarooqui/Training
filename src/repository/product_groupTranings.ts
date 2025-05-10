@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { product_group_trainings } from "@prisma/client";
 
 class product_groupTrainingsRepository{
@@ -8,9 +8,10 @@ class product_groupTrainingsRepository{
         this.prisma = new PrismaClient()
     }
 
-    public CreateProduct_group_training = async(product_groupTrainingData:product_group_trainings):Promise<product_group_trainings>=>{
-        return await this.prisma.product_group_trainings.create({data:product_groupTrainingData})
+   public CreateProduct_group_training = async (product_groupTrainingData: Prisma.product_group_trainingsUncheckedCreateInput): Promise<product_group_trainings> => {
+        return await this.prisma.product_group_trainings.create({data: product_groupTrainingData});
     }
+
 
     public UpdateProduct_group_training = async(id:string,product_groupTrainingData:product_group_trainings):Promise<product_group_trainings>=>{
         return await this.prisma.product_group_trainings.update({where:{id:id},data:product_groupTrainingData})

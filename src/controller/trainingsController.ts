@@ -1,4 +1,4 @@
-import { Prisma,status } from "@prisma/client";
+import { Prisma ,status} from "@prisma/client";
 import trainingServiceImplementation from "../service/implementation/trainingServiceImplementation";
 import { Request,Response } from "express";
 import {trainings} from "../model/trainings"
@@ -8,7 +8,8 @@ import Product_groupServiceImplementation from "../service/implementation/produc
 import { product_groups } from "../model/product_groups";
 import Product_group_trainingServiceImplementation from "../service/implementation/product_group_trainingServiceImplementation";
 import { product_groupTrainings } from "../model/product_groupTrainings";
-
+import {Product_group_training} from "../../types/product_group_training"
+import { connect } from "http2";
 class trainingsController{
     
     training_service: trainingServiceImplementation
@@ -40,7 +41,7 @@ class trainingsController{
                 let trainingValues :trainings = await this.CreateTrainingData(trainingData);
                 if(trainingValues){
                     if(photo == null||photo == undefined){
-                        let trainingResponse: any = await this.training_service.CreateTraining(trainingData);
+                        let trainingResponse: any = await this.training_service.CreateTraining(trainingValues);
                         if(trainingResponse == null || trainingResponse == undefined){
                             res.status(400).json({error:"training not created please try again"})
                         }else{
@@ -55,22 +56,27 @@ class trainingsController{
                             stream.pipe(writer);
                             let url = `${process.env.server}/${filePath}`
                             console.log(url)
-                            trainingData["photo"] = url;
-                            let response :trainings|undefined|{error:"data is required",status:400} = this.training_service.CreateTraining(trainingData);
+                            trainingValues["photo"] = url;
+                            let response :trainings|any|{error:"data is required",status:400} = await this.training_service.CreateTraining(trainingValues);
+                            console.log(response)
                             if(response.error && response.status){
                                 res.status(400).json({error:response.error})
                             }else{
-                                let product_group_training = JSON.parse(trainingData.product_group_training)
-                                if(Array.isArray(trainingData.product_group_training)){
+                                let product_group_training = JSON.parse(trainingData?.product_group_trainings)
+                                if(Array.isArray(product_group_training)){
                                     for (let product of product_group_training){
                                         let validate :product_groups = await this.product_group_service.GetProduct_groupById(product);
+                                        console.log(validate)
                                         if(validate != null || validate != undefined){
                                             let data = {
-                                                training_id : response.id,
-                                                product_group_id : product,
-                                                product_group_name : validate.name
-                                            }
-                                            let cratedData : product_groupTrainings = await this.product_group_training_service.CreateProduct_group_training(data);
+                                                id: trainingData.id,
+                                                product_group_id:product,
+                                                training_id:response.id,
+                                                product_group_name: validate.name,
+                                                createdAt: new Date(),
+                                                updatedAt: new Date(),
+                                            };
+                                            let cratedData  = await this.product_group_training_service.CreateProduct_group_training(data);
                                             if(cratedData){
                                                 success.push(`${validate.name} product group has been created`);
                                             }else{
@@ -85,7 +91,7 @@ class trainingsController{
                                         res.status(400).json({errors:errors,message:"Some product group or product model didnt exist please select properly"});
                                     }
                                 }else if(success.length > 0 && errors.length == 0){
-                                    res.status(200).json({message:`${response.subject} created successfully` });
+                                    res.status(200).json({message:`${trainingValues.subject} created successfully` });
                                 }else{
                                     res.status(400).json({errors:errors,message:"Some product group or product model didnt exist please select properly"});
                                 }
@@ -202,7 +208,7 @@ class trainingsController{
         let filterBy = req.query.filterBy as string
         keyword = keyword == null || keyword == undefined ? "": keyword
         try {
-            let trainingResponse :{count : number,rows:object[]} | {error ?: string ,status?:number } = await this.training_service.GetAllTrainings(page,limit,keyword,filterBy as status);
+            let trainingResponse  = await this.training_service.GetAllTrainings(page,limit,keyword,filterBy as status);
             if(trainingResponse == null || trainingResponse == undefined){
                 res.status(400).json({error:"Something went wrong please try again"});
             }else{
@@ -217,6 +223,7 @@ class trainingsController{
         let id : string = req.params?.id;
         try {
             let trainingResponse = await this.training_service.DeleteTraining(id);
+            console.log(trainingResponse)
             if(trainingResponse == null || trainingResponse == undefined){
                 res.status(400).json({error:"Something went wrong please try again"});
             }else if (trainingResponse.error || trainingResponse.status == 400){
