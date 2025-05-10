@@ -1,5 +1,6 @@
 import { $Enums, Prisma, PrismaClient, status } from "@prisma/client"
 import {trainings} from "../model/trainings"
+import trainingRouter from "../routes/trainingRoutes"
 
 class TrainingRepository{
     prisma: PrismaClient
@@ -16,7 +17,7 @@ class TrainingRepository{
         return await this.prisma.trainings.update({where:{id:id},data:trainingData})
     }
 
-    public GetAllTrainings = async(page:number,limit:number,keyword:string,filterBy:status | $Enums.status) :Promise<{count:number,rows:trainings|Array<trainings>}> => {
+    public GetAllTrainings = async(page:number,limit:number,keyword:string,filterBy:status | $Enums.status) :Promise<Prisma.trainingsGetPayload<{ include: { product_group_trainings: true } }>[] > => {
         let Training = await this.prisma.trainings.findMany({
             where:{
                 OR:[
@@ -32,15 +33,19 @@ class TrainingRepository{
                         mode:'insensitive'
                     }
                 }
+                
             ],
                 status:filterBy,
             },
             skip:page,
             take:limit,
+            include: {
+                product_group_trainings: true
+            },
             orderBy:{updatedAt:"desc"}
+            
         })
-        let count = await this.prisma.trainings.count()
-        return {count:count,rows:Training}
+        return Training
     }
 
     public GetTrainingById = async(id:string) :Promise< trainings | null > => {

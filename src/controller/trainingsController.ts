@@ -1,25 +1,38 @@
-import { Prisma, status } from "@prisma/client";
+import { Prisma ,status} from "@prisma/client";
 import trainingServiceImplementation from "../service/implementation/trainingServiceImplementation";
 import { Request,Response } from "express";
 import {trainings} from "../model/trainings"
 import { Readable } from "stream";
 import fs  from 'fs';
-
-
+import Product_groupServiceImplementation from "../service/implementation/product_groupServiceImplementation";
+import { product_groups } from "../model/product_groups";
+import Product_group_trainingServiceImplementation from "../service/implementation/product_group_trainingServiceImplementation";
+import { product_groupTrainings } from "../model/product_groupTrainings";
+import {Product_group_training} from "../../types/product_group_training"
+import { connect } from "http2";
 class trainingsController{
     
     training_service: trainingServiceImplementation
-    
+    product_group_service: Product_groupServiceImplementation;
+    product_group_training_service : Product_group_trainingServiceImplementation;
+
     public destination: string = "src/upload"
-
-
+    
+    
     constructor(){
         this.training_service = new trainingServiceImplementation();
+        this.product_group_service = new Product_groupServiceImplementation()
+        this.product_group_training_service = new Product_group_trainingServiceImplementation()
     }
 
     public CreateTraining = async(req:Request,res:Response)=>{
         let trainingData = req.body
         let photo:any  = req.file;
+        let success :Array<string> = []
+        let errors :Array<string> = []
+        
+        //how product_group_training is coming
+        console.log(trainingData.product_group_training)
         console.log(photo)
         if(trainingData == null || trainingData == undefined){
             res.status(400).json({error:"Data not found please fill the data"})
@@ -28,7 +41,7 @@ class trainingsController{
                 let trainingValues :trainings = await this.CreateTrainingData(trainingData);
                 if(trainingValues){
                     if(photo == null||photo == undefined){
-                        let trainingResponse: any = await this.training_service.CreateTraining(trainingData);
+                        let trainingResponse: any = await this.training_service.CreateTraining(trainingValues);
                         if(trainingResponse == null || trainingResponse == undefined){
                             res.status(400).json({error:"training not created please try again"})
                         }else{
@@ -43,13 +56,45 @@ class trainingsController{
                             stream.pipe(writer);
                             let url = `${process.env.server}/${filePath}`
                             console.log(url)
-                            trainingData["photo"] = url;
-                            let response :any = await  this.training_service.CreateTraining(trainingData);
+                            trainingValues["photo"] = url;
+                            let response :trainings|any|{error:"data is required",status:400} = await this.training_service.CreateTraining(trainingValues);
                             console.log(response)
                             if(response.error && response.status){
                                 res.status(400).json({error:response.error})
                             }else{
-                                res.status(200).json({message:"Created training Successfully",response})
+                                let product_group_training = JSON.parse(trainingData?.product_group_trainings)
+                                if(Array.isArray(product_group_training)){
+                                    for (let product of product_group_training){
+                                        let validate :product_groups = await this.product_group_service.GetProduct_groupById(product);
+                                        console.log(validate)
+                                        if(validate != null || validate != undefined){
+                                            let data = {
+                                                id: trainingData.id,
+                                                product_group_id:product,
+                                                training_id:response.id,
+                                                product_group_name: validate.name,
+                                                createdAt: new Date(),
+                                                updatedAt: new Date(),
+                                            };
+                                            let cratedData  = await this.product_group_training_service.CreateProduct_group_training(data);
+                                            if(cratedData){
+                                                success.push(`${validate.name} product group has been created`);
+                                            }else{
+                                                errors.push(`${validate.name} product group has not created`);    
+                                            }
+                                        }
+                                    }
+                                }
+                                if(errors.length > 0 && success.length == 0){
+                                    let deleteTraining = await this.training_service.DeleteTraining(response.id);
+                                    if(deleteTraining){
+                                        res.status(400).json({errors:errors,message:"Some product group or product model didnt exist please select properly"});
+                                    }
+                                }else if(success.length > 0 && errors.length == 0){
+                                    res.status(200).json({message:`${trainingValues.subject} created successfully` });
+                                }else{
+                                    res.status(400).json({errors:errors,message:"Some product group or product model didnt exist please select properly"});
+                                }
                             }
                         }else{
                             res.status(400).json({error:"Please Select either png or jpg or jpeg file"});    
@@ -163,7 +208,7 @@ class trainingsController{
         let filterBy = req.query.filterBy as string
         keyword = keyword == null || keyword == undefined ? "": keyword
         try {
-            let trainingResponse :{count : number,rows:object[]} | {error ?: string ,status?:number } = await this.training_service.GetAllTrainings(page,limit,keyword,filterBy as status);
+            let trainingResponse  = await this.training_service.GetAllTrainings(page,limit,keyword,filterBy as status);
             if(trainingResponse == null || trainingResponse == undefined){
                 res.status(400).json({error:"Something went wrong please try again"});
             }else{

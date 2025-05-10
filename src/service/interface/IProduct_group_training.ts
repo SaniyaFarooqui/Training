@@ -3,7 +3,7 @@ import { product_group_trainings } from "@prisma/client";
 
 interface IProduct_group_trainingService{
 
-    CreateProduct_group_training(product_group_trainingData: product_group_trainings):Promise<product_group_trainings>
+    CreateProduct_group_training(product_group_trainingData: product_group_trainings):Promise<product_group_trainings | { error: string; status: number }| undefined> 
 
     UpdateProduct_group_training(id:string,product_group_trainingData:product_group_trainings):Promise<product_group_trainings>
 
