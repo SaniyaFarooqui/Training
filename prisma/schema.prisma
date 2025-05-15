@@ -35,7 +35,7 @@ model trainings{
   assesment_required String
   published String
   status status
-  photo String
+  photo String?
   country String
   state String
   city String
@@ -115,13 +115,13 @@ model product_models{
 
 model  product_model_trainings{
   id String @id @unique @default(uuid()) @db.Uuid
-  training_id String
-  product_group_id String
-  product_model_id String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  training trainings @relation(fields: [training_id],references: [id])
-  product_model product_models @relation(fields: [product_model_id],references: [id])
+  training_id String?
+  product_group_id String?
+  product_model_id String?
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+  training trainings? @relation(fields: [training_id],references: [id])
+  product_model product_models? @relation(fields: [product_model_id],references: [id])
 } 
 
 model companies{

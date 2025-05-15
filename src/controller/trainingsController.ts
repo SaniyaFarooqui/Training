@@ -1,4 +1,5 @@
-import { Prisma ,status} from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
+import type { Prisma, status } from '@prisma/client';
 import trainingServiceImplementation from "../service/implementation/trainingServiceImplementation";
 import { Request,Response } from "express";
 import {trainings} from "../model/trainings"
@@ -7,16 +8,17 @@ import fs  from 'fs';
 import Product_groupServiceImplementation from "../service/implementation/product_groupServiceImplementation";
 import { product_groups } from "../model/product_groups";
 import Product_group_trainingServiceImplementation from "../service/implementation/product_group_trainingServiceImplementation";
-import { product_groupTrainings } from "../model/product_groupTrainings";
-import {Product_group_training} from "../../types/product_group_training"
-import { connect } from "http2";
-import { table } from "console";
+import Product_modelServiceImplementation from '../service/implementation/product_modelServiceImplementation';
+import Product_model_trainingServiceImplementation from '../service/implementation/product_model_trainingServiceImplementation';
+
 class trainingsController{
 
     training_service: trainingServiceImplementation
     product_group_service: Product_groupServiceImplementation;
     product_group_training_service : Product_group_trainingServiceImplementation;
-    
+    product_model_service : Product_modelServiceImplementation;
+    product_model_training_service : Product_model_trainingServiceImplementation;
+
    public destination: string = "src/upload/training"
     
     
@@ -24,6 +26,8 @@ class trainingsController{
         this.training_service = new trainingServiceImplementation();
         this.product_group_service = new Product_groupServiceImplementation()
         this.product_group_training_service = new Product_group_trainingServiceImplementation()
+        this.product_model_service = new Product_modelServiceImplementation()
+        this.product_model_training_service = new Product_model_trainingServiceImplementation()
     }
 
     public CreateTraining = async(req:Request,res:Response)=>{
@@ -32,9 +36,6 @@ class trainingsController{
         let success :Array<string> = []
         let errors :Array<string> = []
         
-        //how product_group_training is coming
-        console.log(trainingData.product_group_training)
-        console.log(photo)
         if(trainingData == null || trainingData == undefined){
             res.status(400).json({error:"Data not found please fill the data"})
         }else{
@@ -52,10 +53,10 @@ class trainingsController{
                         if(photo.mimetype?.split("/")[1] == "jpg" || photo.mimetype?.split("/")[1] == "png" || photo.mimetype?.split("/")[1] == "jpeg"){
                             let stream = Readable.from(photo.buffer as Buffer);
                             let filename = photo.originalname?.replaceAll(" ","_");
-                            let filePath = `${this.destination}/${filename?.split(".")[0]+"_"+this.getTimeStamp()+"."+filename?.split(".")[1]}`
+                            let filePath = `${this.destination}/${filename?.split(".")[0]}_${this.getTimeStamp()}.${filename?.split(".")[1]}`;
                             let writer = fs.createWriteStream(filePath);
                             stream.pipe(writer);
-                            let url = `${process.env.server}/${filePath}`
+                            let url = `${process.env.server}/${filePath}`;
                             console.log(url)
                             trainingValues["photo"] = url;
                             let response :trainings|any|{error:"data is required",status:400} = await this.training_service.CreateTraining(trainingValues);
@@ -86,6 +87,33 @@ class trainingsController{
                                         }
                                     }
                                 }
+
+                                let product_model_trainings = JSON.parse(trainingData?.product_model_trainings)
+                                if(Array.isArray(product_model_trainings)){
+                                    for(let product of product_model_trainings){
+                                        let validateProductGroup = await this.product_group_service.GetProduct_groupById(product.product_group);
+                                        if(validateProductGroup != null || validateProductGroup != undefined){
+                                            let validateProductModel = await this.product_model_service.GetProduct_modelById(product.product_model);
+                                            if(validateProductModel != null || validateProductModel != undefined){
+                                                let data = {
+                                                    id: trainingData.id,
+                                                    product_group_id: product.product_group,
+                                                    product_model_id: product.product_model,
+                                                    training_id: response.id,
+                                                    createdAt: new Date(),
+                                                    updatedAt: new Date(),
+                                                }
+                                                let createModel = await this.product_model_training_service.CreateProduct_model_training(data);
+                                                if(createModel){
+                                                    success.push(`${validateProductGroup.name} product model and ${validateProductModel.name} product model has been created`);
+                                                }else{
+                                                    errors.push(`${validateProductGroup.name} product model and ${validateProductModel.name} product model has not been created`);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
                                 if(errors.length > 0 && success.length == 0){
                                     let deleteTraining = await this.training_service.DeleteTraining(response.id);
                                     if(deleteTraining){
@@ -107,7 +135,6 @@ class trainingsController{
             } catch (error:any) {
                 console.log(error)
                 if(error.errors){
-                
                     let validationerror = []
                     for await(let response of error.errors){
                         let obj :{path : string,message : string} = {
@@ -152,7 +179,7 @@ class trainingsController{
                             if(photo.originalname?.split(".")[1] == "jpeg"||photo.originalname?.split(".")[1] == "png"||photo.originalname?.split(".")[1] == "jpg"){
                                 let streamData = Readable.from(photo.buffer as Buffer);
                                 let filename = photo.originalname?.replaceAll(" ","_");
-                                let filePath = `${destination}/${filename?.split(".")[0]+"_"+this.getTimeStamp()+"."+filename?.split(".")[1]}`
+                                let filePath = `${destination}/${filename?.split(".")[0]}_${this.getTimeStamp()}.${filename?.split(".")[1]}`;
                                 let writer = fs.createWriteStream(filePath);
                                 streamData.pipe(writer);
                                 training["photo"] = `${process.env.server}/${filePath}`
@@ -177,7 +204,7 @@ class trainingsController{
                             fs.rmSync(`${destination}/${filenameData}`);
                             let streamData = Readable.from((req.file as Express.Multer.File).buffer);
                             let filename = req.file?.originalname?.replaceAll(" ","_");
-                            let filePath = `${destination}/${filename?.split(".")[0]+"_"+this.getTimeStamp()+"."+filename?.split(".")[1]}`
+                            let filePath = `${destination}/${filename?.split(".")[0]}_${this.getTimeStamp()}.${filename?.split(".")[1]}`;
                             let writer = fs.createWriteStream(filePath);
                             streamData.pipe(writer);
                             training["photo"] = `${process.env.server}/${filePath}`
@@ -236,7 +263,7 @@ class trainingsController{
             res.status(404).json({error:"Please provide status"})
         }else{
             try {
-                let trainingResponse = await this.training_service.GetTrainingByStatus(status as Prisma.EnumstatusFilter)
+                let trainingResponse = await this.training_service.GetTrainingByStatus(status as status)
                 if(trainingResponse == null || trainingResponse == undefined){
                     res.status(400).json({error:"data not found"})
                 }else{

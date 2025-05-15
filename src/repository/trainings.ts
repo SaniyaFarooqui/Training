@@ -17,7 +17,7 @@ class TrainingRepository{
         return await this.prisma.trainings.update({where:{id:id},data:trainingData})
     }
 
-    public GetAllTrainings = async(page:number,limit:number,keyword:string,filterBy:status | $Enums.status) :Promise<Prisma.trainingsGetPayload<{ include: { product_group_trainings: true } }>[] > => {
+    public GetAllTrainings = async(page:number,limit:number,keyword:string,filterBy:status | $Enums.status) :Promise<Prisma.trainingsGetPayload<{ include: { product_group_trainings: {include:{product_group:true}},product_model_trainings:{include:{product_model:true}} } }>[] > => {
         let Training = await this.prisma.trainings.findMany({
             where:{
                 OR:[
@@ -40,7 +40,16 @@ class TrainingRepository{
             skip:page,
             take:limit,
             include: {
-                product_group_trainings: true
+                product_group_trainings: {
+                    include:{
+                        product_group:true
+                    }
+                },
+                product_model_trainings: {
+                    include:{
+                        product_model:true,
+                    },
+                },
             },
             orderBy:{updatedAt:"desc"}
             
