@@ -10,13 +10,14 @@ import Product_group_trainingServiceImplementation from "../service/implementati
 import { product_groupTrainings } from "../model/product_groupTrainings";
 import {Product_group_training} from "../../types/product_group_training"
 import { connect } from "http2";
+import { table } from "console";
 class trainingsController{
-    
+
     training_service: trainingServiceImplementation
     product_group_service: Product_groupServiceImplementation;
     product_group_training_service : Product_group_trainingServiceImplementation;
-
-    public destination: string = "src/upload"
+    
+   public destination: string = "src/upload/training"
     
     
     constructor(){
@@ -124,23 +125,69 @@ class trainingsController{
             } 
         }
     }
-    
     public UpdateTraining =async(req:Request,res:Response)=>{
         let id = req.params.id;
         let trainingData = req.body
+        let photo = req.file;
+        let destination = "src/upload/training"
         if(id == null || id == undefined){
             res.status(400).json({error:"invalid id"})
         }else{
             try {
+                let training = await this.CreateTrainingData(trainingData);
+
                 let isExist = await this.training_service.GetTrainingById(id);
                 if(isExist == null || isExist == undefined){
                     res.status(400).json({error: "please select training properly"})
                 }else{
-                    let trainingResponse = await this.training_service.UpdateTraining(id,trainingData);
-                    if(trainingResponse == null || trainingResponse == undefined){
-                        res.status(200).json({data:trainingResponse})
+                    if(photo == null || photo == undefined){
+                        let data  :[affectedcount :number]= await this.training_service.UpdateTraining(id,training);       
+                        if(data){
+                            res.status(200).json({message:"Updated Successfully"});
+                        }else{
+                            res.status(400).json({error:"Cannot update please try again"});
+                        } 
                     }else{
-                    res.status(200).json({message : " updated training successfully"}) 
+                        if(isExist.photo ==  null || isExist.photo == undefined){
+                            if(photo.originalname?.split(".")[1] == "jpeg"||photo.originalname?.split(".")[1] == "png"||photo.originalname?.split(".")[1] == "jpg"){
+                                let streamData = Readable.from(photo.buffer as Buffer);
+                                let filename = photo.originalname?.replaceAll(" ","_");
+                                let filePath = `${destination}/${filename?.split(".")[0]+"_"+this.getTimeStamp()+"."+filename?.split(".")[1]}`
+                                let writer = fs.createWriteStream(filePath);
+                                streamData.pipe(writer);
+                                training["photo"] = `${process.env.server}/${filePath}`
+                                let data :{error?:string,status:400}|[affectedCount?:number]|undefined = await this.training_service.UpdateTraining(id,training);       
+                                if(data instanceof Array){
+                                    if(typeof data == "number"){
+                                        if(data > 0){
+                                            res.status(200).json({message:"Updated Successfully"});
+                                        }else{
+                                            res.status(400).json({error:"Cannot update please try again"});
+                                        }
+                                    }
+                                }else{
+                                    res.status(400).json({error:"training not updated please try again"})
+                                }
+                            }else{
+                                res.status(400).json({error_message:"Plese select either png or jpeg or jpg file format"})
+                            }
+                        }else{
+                            let existingImagePathParts = isExist.photo.split("/");
+                            let filenameData = existingImagePathParts[existingImagePathParts.length - 1];
+                            fs.rmSync(`${destination}/${filenameData}`);
+                            let streamData = Readable.from((req.file as Express.Multer.File).buffer);
+                            let filename = req.file?.originalname?.replaceAll(" ","_");
+                            let filePath = `${destination}/${filename?.split(".")[0]+"_"+this.getTimeStamp()+"."+filename?.split(".")[1]}`
+                            let writer = fs.createWriteStream(filePath);
+                            streamData.pipe(writer);
+                            training["photo"] = `${process.env.server}/${filePath}`
+                            let data :{error?:string,status:400}|[affectedCount?:number]|undefined = await this.training_service.UpdateTraining(id,training); 
+                                if(data){
+                                    res.status(200).json({message:"Updated Successfully"});
+                                }else{
+                                    res.status(400).json({error:"Cannot update please try again"});
+                                }
+                        }
                     }
                 }
             } catch ( error: any ) {
