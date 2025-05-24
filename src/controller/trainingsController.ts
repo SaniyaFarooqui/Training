@@ -152,11 +152,14 @@ class trainingsController{
             } 
         }
     }
-    public UpdateTraining =async(req:Request,res:Response)=>{
+
+    public UpdateTraining = async(req:Request,res:Response)=>{
         let id = req.params.id;
         let trainingData = req.body
         let photo = req.file;
         let destination = "src/upload/training"
+        let success : Array<string> = []
+        let errors : Array<string> = []
         if(id == null || id == undefined){
             res.status(400).json({error:"invalid id"})
         }else{
@@ -170,6 +173,93 @@ class trainingsController{
                     if(photo == null || photo == undefined){
                         let data  :[affectedcount :number]= await this.training_service.UpdateTraining(id,training);       
                         if(data){
+
+                            let removeProductGroupTraining = await JSON.parse(trainingData?.remove_product_groups);
+                            if(Array.isArray(removeProductGroupTraining)){
+                                for await(let product_group of removeProductGroupTraining){
+                                    let validateProductGroup = await this.product_group_training_service.GetProduct_group_trainingById(product_group)
+                                    if(validateProductGroup != null || validateProductGroup != undefined){
+                                        await this.product_group_training_service.DeleteProduct_group_training(product_group);
+                                    }
+                                }
+                            }
+                            
+                            let removeProductModelTraining = await JSON.parse(trainingData?.remove_product_models);
+                            if(Array.isArray(removeProductModelTraining)){
+                                for await(let product_model of removeProductModelTraining){
+                                    let validateProductModel = await this.product_group_training_service.GetProduct_group_trainingById(product_model)
+                                    if(validateProductModel != null || validateProductModel != undefined){
+                                        await this.product_model_training_service.DeleteProduct_model_training(product_model)
+                                    }
+                                }
+                            }
+
+                            let product_group_training = JSON.parse(trainingData?.product_group_trainings)
+                            if(Array.isArray(product_group_training)){
+                                for (let product of product_group_training){
+                                    let validate :product_groups = await this.product_group_service.GetProduct_groupById(product);
+                                    console.log(validate)
+                                    if(validate != null || validate != undefined){
+                                        let data = {
+                                            id: trainingData.id,
+                                            product_group_id:product,
+                                            training_id:id,
+                                            product_group_name: validate.name,
+                                            createdAt: new Date(),
+                                            updatedAt: new Date(),
+                                        };
+                                        let validateProductGroupTraining = await this.product_group_training_service.GetProduct_group_trainingByProductGroupId(product)
+                                        if(validateProductGroupTraining == null || validateProductGroupTraining == undefined){
+                                            let cratedData  = await this.product_group_training_service.CreateProduct_group_training(data);
+                                            if(cratedData){
+                                                success.push(`${validate.name} product group has been created`);
+                                            }else{
+                                                errors.push(`${validate.name} product group has not created`);    
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            let product_model_trainings = JSON.parse(trainingData?.product_model_trainings)
+                            if(Array.isArray(product_model_trainings)){
+                                for(let product of product_model_trainings){
+                                    let validateProductGroup = await this.product_group_service.GetProduct_groupById(product.product_group);
+                                    if(validateProductGroup != null || validateProductGroup != undefined){
+                                        let validateProductModel = await this.product_model_service.GetProduct_modelById(product.product_model);
+                                        if(validateProductModel != null || validateProductModel != undefined){
+                                            let data = {
+                                                id: trainingData.id,
+                                                product_group_id: product.product_group,
+                                                product_model_id: product.product_model,
+                                                training_id: id,
+                                                createdAt: new Date(),
+                                                updatedAt: new Date(),
+                                            }
+                                            let validateProductModel = await this.product_model_training_service.GetProductModelTrainingByProductModelId(product.product_model)
+                                            if(validateProductModel == null || validateProductModel == undefined){
+                                                let createModel = await this.product_model_training_service.CreateProduct_model_training(data);
+                                                if(createModel){
+                                                    success.push(`${validateProductGroup.name} product model and ${validateProductModel.name} product model has been created`);
+                                                }else{
+                                                    errors.push(`${validateProductGroup.name} product model and ${validateProductModel.name} product model has not been created`);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if(errors.length > 0 && success.length == 0){
+                                let deleteTraining = await this.training_service.DeleteTraining(id);
+                                if(deleteTraining){
+                                    res.status(400).json({errors:errors,message:"Some product group or product model didnt exist please select properly"});
+                                }
+                            }else if(success.length > 0 && errors.length == 0){
+                                res.status(200).json({message:`${isExist.subject} created successfully` });
+                            }else{
+                                res.status(400).json({errors:errors,message:"Some product group or product model didnt exist please select properly"});
+                            }
                             res.status(200).json({message:"Updated Successfully"});
                         }else{
                             res.status(400).json({error:"Cannot update please try again"});
@@ -184,16 +274,97 @@ class trainingsController{
                                 streamData.pipe(writer);
                                 training["photo"] = `${process.env.server}/${filePath}`
                                 let data :{error?:string,status:400}|[affectedCount?:number]|undefined = await this.training_service.UpdateTraining(id,training);       
-                                if(data instanceof Array){
-                                    if(typeof data == "number"){
-                                        if(data > 0){
-                                            res.status(200).json({message:"Updated Successfully"});
-                                        }else{
-                                            res.status(400).json({error:"Cannot update please try again"});
+                                if(data){
+
+                                    let removeProductGroupTraining = await JSON.parse(trainingData?.remove_product_groups);
+                                    if(Array.isArray(removeProductGroupTraining)){
+                                        for await(let product_group of removeProductGroupTraining){
+                                            let validateProductGroup = await this.product_group_training_service.GetProduct_group_trainingById(product_group)
+                                            if(validateProductGroup != null || validateProductGroup != undefined){
+                                                await this.product_group_training_service.DeleteProduct_group_training(product_group);
+                                            }
                                         }
                                     }
+                                    
+                                    let removeProductModelTraining = await JSON.parse(trainingData?.remove_product_models);
+                                    if(Array.isArray(removeProductModelTraining)){
+                                        for await(let product_model of removeProductModelTraining){
+                                            let validateProductModel = await this.product_group_training_service.GetProduct_group_trainingById(product_model)
+                                            if(validateProductModel != null || validateProductModel != undefined){
+                                                await this.product_model_training_service.DeleteProduct_model_training(product_model)
+                                            }
+                                        }
+                                    }
+
+                                    let product_group_training = JSON.parse(trainingData?.product_group_trainings)
+                                    if(Array.isArray(product_group_training)){
+                                        for (let product of product_group_training){
+                                            let validate :product_groups = await this.product_group_service.GetProduct_groupById(product);
+                                            console.log(validate)
+                                            if(validate != null || validate != undefined){
+                                                let data = {
+                                                    id: trainingData.id,
+                                                    product_group_id:product,
+                                                    training_id:id,
+                                                    product_group_name: validate.name,
+                                                    createdAt: new Date(),
+                                                    updatedAt: new Date(),
+                                                };
+                                                let validateProductGroupTraining = await this.product_group_training_service.GetProduct_group_trainingByProductGroupId(product)
+                                                if(validateProductGroupTraining == null || validateProductGroupTraining == undefined){
+                                                    let cratedData  = await this.product_group_training_service.CreateProduct_group_training(data);
+                                                    if(cratedData){
+                                                        success.push(`${validate.name} product group has been created`);
+                                                    }else{
+                                                        errors.push(`${validate.name} product group has not created`);    
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    let product_model_trainings = JSON.parse(trainingData?.product_model_trainings)
+                                    if(Array.isArray(product_model_trainings)){
+                                        for(let product of product_model_trainings){
+                                            let validateProductGroup = await this.product_group_service.GetProduct_groupById(product.product_group);
+                                            if(validateProductGroup != null || validateProductGroup != undefined){
+                                                let validateProductModel = await this.product_model_service.GetProduct_modelById(product.product_model);
+                                                if(validateProductModel != null || validateProductModel != undefined){
+                                                    let data = {
+                                                        id: trainingData.id,
+                                                        product_group_id: product.product_group,
+                                                        product_model_id: product.product_model,
+                                                        training_id: id,
+                                                        createdAt: new Date(),
+                                                        updatedAt: new Date(),
+                                                    }
+                                                    let validateProductModel = await this.product_model_training_service.GetProductModelTrainingByProductModelId(product.product_model)
+                                                    if(validateProductModel == null || validateProductModel == undefined){
+                                                        let createModel = await this.product_model_training_service.CreateProduct_model_training(data);
+                                                        if(createModel){
+                                                            success.push(`${validateProductGroup.name} product model and ${validateProductModel.name} product model has been created`);
+                                                        }else{
+                                                            errors.push(`${validateProductGroup.name} product model and ${validateProductModel.name} product model has not been created`);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if(errors.length > 0 && success.length == 0){
+                                        let deleteTraining = await this.training_service.DeleteTraining(id);
+                                        if(deleteTraining){
+                                            res.status(400).json({errors:errors,message:"Some product group or product model didnt exist please select properly"});
+                                        }
+                                    }else if(success.length > 0 && errors.length == 0){
+                                        res.status(200).json({message:`${isExist.subject} created successfully` });
+                                    }else{
+                                        res.status(400).json({errors:errors,message:"Some product group or product model didnt exist please select properly"});
+                                    }
+                                    res.status(200).json({message:"Updated Successfully"});
                                 }else{
-                                    res.status(400).json({error:"training not updated please try again"})
+                                    res.status(400).json({error:"Cannot update please try again"});
                                 }
                             }else{
                                 res.status(400).json({error_message:"Plese select either png or jpeg or jpg file format"})
@@ -209,11 +380,98 @@ class trainingsController{
                             streamData.pipe(writer);
                             training["photo"] = `${process.env.server}/${filePath}`
                             let data :{error?:string,status:400}|[affectedCount?:number]|undefined = await this.training_service.UpdateTraining(id,training); 
-                                if(data){
-                                    res.status(200).json({message:"Updated Successfully"});
-                                }else{
-                                    res.status(400).json({error:"Cannot update please try again"});
+                            if(data){
+
+                                let removeProductGroupTraining = await JSON.parse(trainingData?.remove_product_groups);
+                                if(Array.isArray(removeProductGroupTraining)){
+                                    for await(let product_group of removeProductGroupTraining){
+                                        let validateProductGroup = await this.product_group_training_service.GetProduct_group_trainingById(product_group)
+                                        if(validateProductGroup != null || validateProductGroup != undefined){
+                                            await this.product_group_training_service.DeleteProduct_group_training(product_group);
+                                        }
+                                    }
                                 }
+                                
+                                let removeProductModelTraining = await JSON.parse(trainingData?.remove_product_models);
+                                if(Array.isArray(removeProductModelTraining)){
+                                    for await(let product_model of removeProductModelTraining){
+                                        let validateProductModel = await this.product_group_training_service.GetProduct_group_trainingById(product_model)
+                                        if(validateProductModel != null || validateProductModel != undefined){
+                                            await this.product_model_training_service.DeleteProduct_model_training(product_model)
+                                        }
+                                    }
+                                }
+                                
+                                let product_group_training = JSON.parse(trainingData?.product_group_trainings)
+                                if(Array.isArray(product_group_training)){
+                                    for (let product of product_group_training){
+                                        let validate :product_groups = await this.product_group_service.GetProduct_groupById(product);
+                                        console.log(validate)
+                                        if(validate != null || validate != undefined){
+                                            let data = {
+                                                id: trainingData.id,
+                                                product_group_id:product,
+                                                training_id:id,
+                                                product_group_name: validate.name,
+                                                createdAt: new Date(),
+                                                updatedAt: new Date(),
+                                            };
+                                            let validateProductGroupTraining = await this.product_group_training_service.GetProduct_group_trainingByProductGroupId(product)
+                                            if(validateProductGroupTraining == null || validateProductGroupTraining == undefined){
+                                                let cratedData  = await this.product_group_training_service.CreateProduct_group_training(data);
+                                                if(cratedData){
+                                                    success.push(`${validate.name} product group has been created`);
+                                                }else{
+                                                    errors.push(`${validate.name} product group has not created`);    
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                let product_model_trainings = JSON.parse(trainingData?.product_model_trainings)
+                                if(Array.isArray(product_model_trainings)){
+                                    for(let product of product_model_trainings){
+                                        let validateProductGroup = await this.product_group_service.GetProduct_groupById(product.product_group);
+                                        if(validateProductGroup != null || validateProductGroup != undefined){
+                                            let validateProductModel = await this.product_model_service.GetProduct_modelById(product.product_model);
+                                            if(validateProductModel != null || validateProductModel != undefined){
+                                                let data = {
+                                                    id: trainingData.id,
+                                                    product_group_id: product.product_group,
+                                                    product_model_id: product.product_model,
+                                                    training_id: id,
+                                                    createdAt: new Date(),
+                                                    updatedAt: new Date(),
+                                                }
+                                                let validateProductModel = await this.product_model_training_service.GetProductModelTrainingByProductModelId(product.product_model)
+                                                if(validateProductModel == null || validateProductModel == undefined){
+                                                    let createModel = await this.product_model_training_service.CreateProduct_model_training(data);
+                                                    if(createModel){
+                                                        success.push(`${validateProductGroup.name} product model and ${validateProductModel.name} product model has been created`);
+                                                    }else{
+                                                        errors.push(`${validateProductGroup.name} product model and ${validateProductModel.name} product model has not been created`);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if(errors.length > 0 && success.length == 0){
+                                    let deleteTraining = await this.training_service.DeleteTraining(id);
+                                    if(deleteTraining){
+                                        res.status(400).json({errors:errors,message:"Some product group or product model didnt exist please select properly"});
+                                    }
+                                }else if(success.length > 0 && errors.length == 0){
+                                    res.status(200).json({message:`${isExist.subject} created successfully` });
+                                }else{
+                                    res.status(400).json({errors:errors,message:"Some product group or product model didnt exist please select properly"});
+                                }
+                                res.status(200).json({message:"Updated Successfully"});
+                            }else{
+                                res.status(400).json({error:"Cannot update please try again"});
+                            }
                         }
                     }
                 }

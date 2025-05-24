@@ -10,7 +10,9 @@ interface IProduct_group_trainingService{
     GetAllProduct_group_trainings(page:number,limit:number):Promise<{count:number,rows:Array<product_group_trainings>}>
 
     GetProduct_group_trainingById(id:string):Promise<product_group_trainings>
-    
+
+    GetProduct_group_trainingByProductGroupId(product_group_id:string):Promise<product_group_trainings|null>
+
     DeleteProduct_group_training(id:string):Promise<product_group_trainings>
 }
 

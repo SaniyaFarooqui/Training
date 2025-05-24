@@ -9,6 +9,8 @@ interface IProduct_model_trainingService{
 
     GetAllProduct_model_trainings(page:number,limit:number):Promise<{count:number,rows:Array<product_model_trainings>}>
 
+    GetProductModelTrainingByProductModelId(product_model_id:string):Promise<product_model_trainings|null|any>
+
     GetProduct_model_trainingById(id:string):Promise<product_model_trainings>
     
     DeleteProduct_model_training(id:string):Promise<product_model_trainings>
