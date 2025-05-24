@@ -33,6 +33,14 @@ class product_modelTrainingsRepository{
         })
     }
 
+    public GetProduct_model_trainingByProductModelId = async(product_model_id:string):Promise<product_model_trainings|null>=>{
+        return await this.prisma.product_model_trainings.findFirst({
+            where:{
+                product_model_id:product_model_id    
+            }
+        });
+    }
+
     public DeleteProduct_model_training =async(id:string):Promise<product_model_trainings>=>{
         return await this.prisma.product_model_trainings.delete({
             where:{
