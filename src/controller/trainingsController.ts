@@ -184,16 +184,12 @@ class trainingsController{
                                 streamData.pipe(writer);
                                 training["photo"] = `${process.env.server}/${filePath}`
                                 let data :{error?:string,status:400}|[affectedCount?:number]|undefined = await this.training_service.UpdateTraining(id,training);       
-                                if(data instanceof Array){
-                                    if(typeof data == "number"){
-                                        if(data > 0){
-                                            res.status(200).json({message:"Updated Successfully"});
-                                        }else{
-                                            res.status(400).json({error:"Cannot update please try again"});
-                                        }
+                                {
+                                    if(data ){
+                                        res.status(200).json({message:"Updated Successfully"});
+                                    }else{
+                                        res.status(400).json({error:"Cannot update please try again"});
                                     }
-                                }else{
-                                    res.status(400).json({error:"training not updated please try again"})
                                 }
                             }else{
                                 res.status(400).json({error_message:"Plese select either png or jpeg or jpg file format"})
