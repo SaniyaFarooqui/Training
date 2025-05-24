@@ -7,7 +7,7 @@ interface ITraningService{
 
     UpdateTraining(id:string,trainingData:trainings):Promise<trainings>
 
-    GetAllTrainings(page:number,limit:number,keyword:string,filterBy:status|$Enums.status): Promise<Prisma.trainingsGetPayload<{ include: { product_group_trainings: true } }>[]|undefined>
+    GetAllTrainings(page:number,limit:number,keyword:string,filterBy:status|$Enums.status): Promise< Prisma.trainingsGetPayload<{select: {product_group_trainings: {select: {id: true;product_group_id: true;product_group: { select: { id: true; name: true}}}},product_model_trainings: {select: { id: true;product_model_id: true,product_group_id: true,product_model: {select: {id: true,name: true}}}}}}>[] |undefined>
 
     GetTrainingById(id:string):Promise<trainings>
 

@@ -30,7 +30,7 @@ class trainingServiceImplementation implements ITraningService{
         }
     }
 
-    public GetAllTrainings = async(page:number,limit:number,keyword:string,filterBy:status | $Enums.status) : Promise<Prisma.trainingsGetPayload<{ include: { product_group_trainings:true} }>[]|undefined> => {
+    public GetAllTrainings = async(page:number,limit:number,keyword:string,filterBy:status | $Enums.status) : Promise< Prisma.trainingsGetPayload<{select: {product_group_trainings: {select: {id: true;product_group_id: true;product_group: { select: { id: true; name: true}}}},product_model_trainings: {select: { id: true;product_model_id: true,product_group_id: true,product_model: {select: {id: true,name: true}}}}}}>[]|undefined > => {
         if(page == null || page == undefined || limit == null || limit == undefined || page == 0 || limit == 0){
             page = 1;
             limit = 10;

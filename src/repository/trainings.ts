@@ -1,7 +1,5 @@
 import { $Enums, Prisma, PrismaClient, status } from "@prisma/client"
 import {trainings} from "../model/trainings"
-import trainingRouter from "../routes/trainingRoutes"
-
 class TrainingRepository{
     prisma: PrismaClient
 
@@ -17,7 +15,7 @@ class TrainingRepository{
         return await this.prisma.trainings.update({where:{id:id},data:trainingData})
     }
 
-    public GetAllTrainings = async(page:number,limit:number,keyword:string,filterBy:status | $Enums.status) :Promise<Prisma.trainingsGetPayload<{ include: { product_group_trainings: {include:{product_group:true}},product_model_trainings:{include:{product_model:true}} } }>[] > => {
+    public GetAllTrainings = async(page:number,limit:number,keyword:string,filterBy:status | $Enums.status) :Promise< Prisma.trainingsGetPayload<{select: {product_group_trainings: {select: {id: true;product_group_id: true;product_group: { select: { id: true; name: true}}}},product_model_trainings: {select: { id: true;product_model_id: true,product_group_id: true,product_model: {select: {id: true,name: true}}}}}}>[] > => {
         let Training = await this.prisma.trainings.findMany({
             where:{
                 OR:[
@@ -39,21 +37,62 @@ class TrainingRepository{
             },
             skip:page,
             take:limit,
-            include: {
-                product_group_trainings: {
-                    include:{
-                        product_group:true
+            select:{
+                id:true,
+                subject:true,
+                details:true,
+                status:true,
+                assesment_required:true,
+                participant_fees :true,
+                currency :true,
+                free_cancellation :true,
+                late_cancellation_rate :true,
+                language :true,
+                type :true,
+                limit :true,
+                startDate :true,
+                endDate :true,
+                certification_expration_time :true,
+                training_leader :true,
+                exam_pass_rate :true,
+                published :true,
+                photo :true,
+                country :true,
+                state :true,
+                city :true,
+                createdAt :true, 
+                updatedAt :true, 
+                scheduleTrainings :true,
+                product_group_trainings:{
+                    select:{
+                        id:true,
+                        product_group_id:true,
+                        product_group:{
+                            select:{
+                                id:true,
+                                name:true,
+                            }                           
+                        }
                     }
                 },
-                product_model_trainings: {
-                    include:{
-                        product_model:true,
-                    },
-                },
+                product_model_trainings:{
+                    select:{
+                        id:true,
+                        product_model_id:true,
+                        product_group_id:true,
+                            product_model:{
+                                select:{
+                                    id:true,
+                                    name:true,
+                                }
+                            }
+                        }
+                    
+                }
             },
-            orderBy:{updatedAt:"desc"}
+          orderBy:{updatedAt:"desc"}
             
-        })
+         })
         return Training
     }
 
