@@ -379,6 +379,7 @@ class UserController{
             city_id :Number(userData.city_id),
             date_of_birth :new Date(userData.date_of_birth),
             zip_code :userData.zip_code,
+            departmentId:userData.departmentId,
             createdAt :userData.createdAt,
             updatedAt :userData.updatedAt
             

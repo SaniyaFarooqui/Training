@@ -50,6 +50,15 @@ class Product_group_trainingServiceImplementation implements IProduct_group_trai
         }
     }
 
+    public GetProduct_group_trainingByProductGroupId = async (product_group_id:string):Promise<product_group_trainings|any> => {
+        if(product_group_id == null || product_group_id == undefined){
+            return {error:"id is required",status:400}
+        }else{
+            let response = await this.repository?.GetProduct_group_trainingByProductGroupId(product_group_id);
+            return response;
+        }
+    }
+
     public DeleteProduct_group_training = async(id:string) :Promise<product_group_trainings|any> => {
         if(id == null || id == undefined){
             return {error:"id is required",status:400}

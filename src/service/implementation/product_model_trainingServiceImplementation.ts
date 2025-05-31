@@ -50,6 +50,17 @@ class Product_model_trainingServiceImplementation implements IProduct_model_trai
         }
     }
 
+    public GetProductModelTrainingByProductModelId = async(product_model_id:string):Promise<product_model_trainings|null|any>=>{
+        if(product_model_id !== null ||product_model_id !== undefined || product_model_id !== ":id"){
+            let response = await this.repository?.GetProduct_model_trainingById(product_model_id);
+            return response
+        }else{
+            let data = {error:"id is required",status:400}
+            return data
+            
+        }
+    }
+
     public DeleteProduct_model_training = async(id:string) :Promise<product_model_trainings|any> => {
         if(id == null || id == undefined){
             return {error:"id is required",status:400}

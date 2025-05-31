@@ -152,6 +152,15 @@ model companies{
   user users[]
 }
 
+model departments{
+  id String @id @unique @default(uuid()) @db.Uuid
+  name String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user users? 
+}
+
+
 model users{
   id String @id @unique @default(uuid()) @db.Uuid
   name String
@@ -186,11 +195,14 @@ model users{
   city_id Int
   date_of_birth DateTime
   zip_code String
+  departmentId String? @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   company companies @relation(fields: [company_id],references: [id])
   role roles @relation(fields: [role_id],references: [id])
   schedule_training schedule_trainings?
+  department   departments? @relation(fields: [departmentId], references: [id])
+ 
 }
 
 model roles{
