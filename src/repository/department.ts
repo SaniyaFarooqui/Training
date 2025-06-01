@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { departments } from "../model/department";
 
 class DepartmentRepository {
@@ -8,31 +8,33 @@ class DepartmentRepository {
         this.prisma = new PrismaClient();
     }
 
-    public CreateDepartment = async (departmentData: departments): Promise<departments> => {
+    public CreateDepartment = async (departmentData: departments): Promise<Prisma.departmentsCreateInput|undefined> => {
         return await this.prisma.departments.create({ data: departmentData });
     }
 
-    public UpdateDepartment = async (id: string, departmentData: departments): Promise<departments > => {
+    public UpdateDepartment = async (id: string, departmentData: departments): Promise<Prisma.departmentsCreateInput|{error:"id is required",status:400}|undefined > => {
         return await this.prisma.departments.update({ where: { id: id }, data: departmentData });
     }
 
-    public GetAllDepartments = async (page: number, limit: number, keyword: string, filterBy: string): Promise<{ count: number, rows: Array<departments> } > => {
+    public GetAllDepartments = async (page: number, limit: number, keyword: string, filterBy: string): Promise<Prisma.departmentsGetPayload<{include:{user: true;}}>[]|undefined > => {
         let departments = await this.prisma.departments.findMany({
             where: {
-                OR: [
-                    {
+                OR: [{
                         name: {
                             startsWith: keyword,
                             mode: 'insensitive'
                         }
                     }
+                    
                 ],
+            },
+            include:{
+                user:true
             },
             skip: page,
             take: limit
         });
-        let count = await this.prisma.departments.count();
-        return { count: count, rows: departments };
+        return departments;
     }
 
     public GetDepartmentById = async (id: string): Promise<departments |null> => {

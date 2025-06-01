@@ -5,7 +5,7 @@ interface IDepartmentService {
 
     UpdateDepartment(id: string, departmentData: departments): Promise<Prisma.departmentsCreateInput|{error:"id is required",status:400}|undefined> ;
 
-    GetAllDepartments(page: number, limit: number, keyword: string, filterBy: string): Promise<{ count: number, rows: Array<departments> }>;
+    GetAllDepartments(page: number, limit: number, keyword: string, filterBy: string): Promise<Prisma.departmentsGetPayload<{include:{user:true}}>[]|undefined>;
 
     GetDepartmentById(id: string): Promise<departments | null>;
 
