@@ -154,7 +154,7 @@ model companies{
 
 model departments{
   id String @id @unique @default(uuid()) @db.Uuid
-  name String
+  name String @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user users? 

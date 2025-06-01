@@ -5,7 +5,9 @@ interface ITraningService{
 
     CreateTraining(trainingData: trainings): Promise<trainings|undefined|{error:"data is required",status:400}>
 
-    UpdateTraining(id:string,trainingData:trainings):Promise<trainings|{error:"id is required",status:400}|undefined>
+    UpdateTraining(id:string,trainingData:trainings):Promise<trainings |{error:string, status:number}|undefined>
+
+    UpdatetrainingStatus(id:string,status:status):Promise<trainings |{error:string, status:number}|undefined>
 
     GetAllTrainings(page:number,limit:number,keyword:string,filterBy:status|$Enums.status): Promise< Prisma.trainingsGetPayload<{select: {product_group_trainings: {select: {id: true;product_group_id: true;product_group: { select: { id: true; name: true}}}},product_model_trainings: {select: { id: true;product_model_id: true,product_group_id: true,product_model: {select: {id: true,name: true}}}}}}>[] |undefined>
 

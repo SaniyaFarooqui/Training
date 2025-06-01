@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import type { Prisma, status } from '@prisma/client';
 import trainingServiceImplementation from "../service/implementation/trainingServiceImplementation";
 import { Request,Response } from "express";
@@ -165,13 +164,12 @@ class trainingsController{
         }else{
             try {
                 let training = await this.CreateTrainingData(trainingData);
-
                 let isExist = await this.training_service.GetTrainingById(id);
                 if(isExist == null || isExist == undefined){
                     res.status(400).json({error: "please select training properly"})
                 }else{
                     if(photo == null || photo == undefined){
-                        let data  :[affectedcount :number]= await this.training_service.UpdateTraining(id,training);       
+                        let data  :trainings |{error:string, status:number}|undefined= await this.training_service.UpdateTraining(id,training);       
                         if(data){
                             if(trainingData?.remove_product_groups != null || trainingData?.remove_product_groups != undefined){
                                 let removeProductGroupTraining = await JSON.parse(trainingData?.remove_product_groups);
@@ -283,7 +281,7 @@ class trainingsController{
                                 let writer = fs.createWriteStream(filePath);
                                 streamData.pipe(writer);
                                 training["photo"] = `${process.env.server}/${filePath}`
-                                let data :{error?:string,status:400}|[affectedCount?:number]|undefined = await this.training_service.UpdateTraining(id,training);       
+                                let data :trainings |{error:string, status:number}|undefined= await this.training_service.UpdateTraining(id,training);       
                                 if(data){
                                     if(trainingData?.remove_product_groups != null || trainingData?.remove_product_groups != undefined){
                                         let removeProductGroupTraining = await JSON.parse(trainingData?.remove_product_groups);
@@ -397,7 +395,7 @@ class trainingsController{
                             let writer = fs.createWriteStream(filePath);
                             streamData.pipe(writer);
                             training["photo"] = `${process.env.server}/${filePath}`
-                            let data :{error?:string,status:400}|[affectedCount?:number]|undefined = await this.training_service.UpdateTraining(id,training); 
+                            let data :trainings |{error:string, status:number}|undefined = await this.training_service.UpdateTraining(id,training); 
                              if(data){
                                 if(trainingData?.remove_product_groups != null || trainingData?.remove_product_groups != undefined){
                                     let removeProductGroupTraining = await JSON.parse(trainingData?.remove_product_groups);
@@ -520,6 +518,45 @@ class trainingsController{
             }
         }
     }
+    
+    public UpdateTrainingStatus = async(req:Request,res:Response)=>{
+        let id = req.params.id;
+        let status = req.body.status as status;
+        if(id == null || id ==undefined|| id ==":id"){
+            res.status(404).json({error:"please provide id"})
+        }else{
+            try{
+                let validateStatus =  ["upcoming","ongoing","closed","finished","cancelled","completed","completed_invoice","archive"]
+                if(validateStatus.includes(status)){
+                    let trainingResponse = await this.training_service.UpdatetrainingStatus(id,status);
+                    if(trainingResponse == null || trainingResponse == undefined){
+                        res.status(400).json({error:"Something went wrong please try again"});
+                    }else{
+                        res.status(200).json({message:`Status Updated Successfully`});
+                    }
+                }else{
+                    res.status(400).json({error:"Please provide valid status"})
+                }
+            }catch ( error: any ) {
+                if(error.errors){
+                    let validationerror : Array<object> = [];
+                    for await(let response of error.errors){
+                        let obj:{path : string , message : string}={
+                            path: "",
+                            message: ""
+                        }
+                        obj.path = response.path;
+                        obj.message = response.message;
+                        validationerror.push(obj);
+                    }
+                    res.status(400).json({errors:validationerror})
+                }else{
+                    res.status(400).json({errors:error.message})
+                }
+            }
+        }
+    }
+
     public GetTrainingById =async(req:Request,res:Response)=>{
         let id = req.params.id;
         if(id == null || id == undefined){

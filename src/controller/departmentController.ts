@@ -14,11 +14,16 @@ class DepartmentController {
             res.status(400).json({ error: "please provide the data" });
         } else {
             try {
-               let response = await this.department_service.CreateDepartment(DepartmentData );
-               if (response == null || response == undefined) {
-                    res.status(400).json({ error: "could not create department, please try again" });
+                let departmentData = await this.department_service.GetDepartmentByName(DepartmentData.name);
+                if(departmentData != null || departmentData != undefined){
+                    res.status(400).json({ error: `${departmentData.name} already exists` });
                 }else{
-                    res.status(201).json({ message: "Department created successfully", data: response });
+                    let response = await this.department_service.CreateDepartment(DepartmentData);
+                    if (response == null || response == undefined) {
+                            res.status(400).json({ error: "could not create department, please try again" });
+                    }else{
+                        res.status(201).json({ message: "Department created successfully", data: response });
+                    }
                 }
             } catch (error: any) {
                 if (error.errors) {
