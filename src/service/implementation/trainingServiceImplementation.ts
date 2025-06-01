@@ -49,6 +49,11 @@ class trainingServiceImplementation implements ITraningService{
         return response;
     }
 
+    public GetAllTrainingsForCrons = async() : Promise<Prisma.trainingsGetPayload<{select:{id:true,subject:true,startDate:true,endDate:true}}>[] | undefined> => {
+        let response = await this.repository?.GetAllTrainingsForCronJob();
+        return response;
+    }
+
     public GetTrainingById = async(id:string) :Promise< trainings|any > => {
         if(id !== null ||id !== undefined || id !== ":id"){
             let response = await this.repository?.GetTrainingById(id);

@@ -168,7 +168,7 @@ model users{
   personal_title String
   work_title String
   email String
-  role_id String @unique
+  role_id String
   company_id String
   status String
   mobile_phone String

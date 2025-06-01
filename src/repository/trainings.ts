@@ -104,6 +104,21 @@ class TrainingRepository{
         return Training
     }
 
+    public GetAllTrainingsForCronJob = async() :Promise<Prisma.trainingsGetPayload<{select:{id:true,subject:true,startDate:true,endDate:true}}>[] | undefined> => {
+        let Training = await this.prisma.trainings.findMany({
+            select:{
+                id:true,
+                subject:true,
+                startDate:true,
+                endDate:true
+            },
+            orderBy:{
+                updatedAt:"desc"
+            },
+        });
+        return Training
+    }
+
     public GetTrainingById = async(id:string) :Promise< trainings | null > => {
         return this.prisma.trainings.findUnique({
             where:{
