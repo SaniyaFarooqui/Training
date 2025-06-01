@@ -21,11 +21,20 @@ class trainingServiceImplementation implements ITraningService{
         }
     }
 
-    public UpdateTraining = async(id:string,trainingData:trainings) :Promise<trainings|any> => {
+    public UpdateTraining = async(id:string,trainingData:trainings) :Promise<trainings |{error:string, status:number}|undefined> => {
         if(id == null || id == undefined){
             return {error:"id is required",status:400}
         }else{
             let response = await this.repository?.UpdateTraining(id,trainingData);
+            return response
+        }
+    }
+
+    public UpdatetrainingStatus = async(id:string,status:status):Promise<trainings |{error:string, status:number}|undefined>=>{
+        if(id == null || id == undefined){
+            return {error:"id is required",status:400}
+        }else{
+            let response = await this.repository?.UpdatetrainingStatus(id,status);
             return response
         }
     }

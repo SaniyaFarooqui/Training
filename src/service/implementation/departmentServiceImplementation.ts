@@ -26,7 +26,7 @@ class DepartmentServiceImplementation implements IDepartmentService {
         }
     }
 
-    public GetAllDepartments = async (page: number, limit: number, keyword: string, filterBy: string): Promise<any> => {
+    public GetAllDepartments = async (page: number, limit: number, keyword: string, filterBy: string): Promise<Prisma.departmentsGetPayload<{include:{user:true}}>[]|undefined> => {
         if (page == null || page == undefined || limit == null || limit == undefined || page == 0 || limit == 0) {
             page = 1;
             limit = 10;

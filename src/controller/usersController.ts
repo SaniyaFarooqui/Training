@@ -21,7 +21,6 @@ class UserController{
         console.log(userData)
         let destination = "src/upload/users"
         let profile_image : File[] | { [fieldname: string]: File[]; } | any = req.file
-        console.log(profile_image);
         if(userData.name == null || userData.name == undefined || userData.email== undefined|| userData.email == null || userData.password == null || userData.password == undefined){
             res.status(400).json({error:"please provide the data"})
         }else{

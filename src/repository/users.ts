@@ -31,6 +31,7 @@ class usersRepository{
             take:limit,
             include:{
                 company:true,
+                department:true,
                 role:{
                     include:{
                         permission:true
