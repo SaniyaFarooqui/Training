@@ -12,7 +12,7 @@ import Product_groupRouter from "./src/routes/product_groupRoutes";
 import Certificate_templateRouter from "./src/routes/certificate_templateRoutes";
 import CertificateRouter from "./src/routes/certificateRoutes";
 import DepartmentRouter from "./src/routes/departmentRoutes";
-
+import { ScheduleTrainingStatusCron } from "./src/crons";
 
 
 dotenv.config()
@@ -33,10 +33,12 @@ app.use("/api/certificate_template",Certificate_templateRouter)
 app.use("/api/Certificate",CertificateRouter)
 app.use("/api/department",DepartmentRouter)
 app.use("/src/upload",express.static("src/upload"))
+
+ScheduleTrainingStatusCron()
+
 const server = app.listen(port,()=>{
     console.log(`Server is accesssing on port : ${port}`);
 })
-
 
 process.on('SIGTERM', () => {
     server.close(() => {
