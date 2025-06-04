@@ -168,7 +168,7 @@ model users{
   personal_title String
   work_title String
   email String
-  role_id String
+  role_id String 
   company_id String
   status String
   mobile_phone String
@@ -208,11 +208,12 @@ model users{
 model roles{
   id String @id @unique @default(uuid()) @db.Uuid
   name String
+  is_system_admin Boolean @default(false)
   permissionId String @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   permission permissions @relation(fields: [permissionId],references: [id])
-  user users?
+  user users[]
 }
 
 model permissions{

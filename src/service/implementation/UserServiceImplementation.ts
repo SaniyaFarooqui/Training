@@ -1,7 +1,8 @@
 import IUserService from "../interface/IUser";
 import usersRepository from "../../repository/users";
-import { users } from "@prisma/client";
+import { Prisma, users } from "@prisma/client";
 import bcrypt from 'bcryptjs'
+import { userType } from "../../../types/userType";
 
 class UserServiceImplementation implements IUserService{
     
@@ -11,7 +12,7 @@ class UserServiceImplementation implements IUserService{
         this.repository = new usersRepository()
     }
 
-    public CreateUser = async(userData: users): Promise<users|any> =>{
+    public CreateUser = async(userData:userType): Promise<userType|{error:string,status:number}|undefined> =>{
         if (userData.password == null || userData.password == undefined){
             return{error:"password is required",status:400}
         }else{
@@ -24,7 +25,7 @@ class UserServiceImplementation implements IUserService{
         }
     }
 
-    public UpdateUser = async(id:string,userData:users) :Promise<users|any> => {
+    public UpdateUser = async(id:string,userData: userType) :Promise<userType|{error:"id is required",status:400}|undefined> => {
         if(id == null || id == undefined){
             return {error:"id is required",status:400}
         }else{
@@ -42,7 +43,7 @@ class UserServiceImplementation implements IUserService{
         }
     }
 
-    public GetAllUsers = async(page:number,limit:number,keyword:string,filterBy:string) :Promise<{count:number,rows:Array<users>}|any> => {
+    public GetAllUsers = async(page:number,limit:number,keyword:string,filterBy:string) :Promise<Prisma.usersGetPayload<{include:{company:true,department:true,role:{include:{permission:true}}}}>[]|undefined|null>=> {
         if(page == null || page == undefined || limit == null || limit == undefined || page == 0 || limit == 0){
             page = 1;
             limit = 10;
@@ -52,7 +53,7 @@ class UserServiceImplementation implements IUserService{
         return response;
     }
 
-    public GetUserById = async(id:string) :Promise< users|any > => {
+    public GetUserById = async(id:string) :Promise<userType|null|{error:string,status:number}|undefined>=> {
         if(id !== null ||id !== undefined || id !== ":id"){
             let response = await this.repository?.GetUserById(id);
             return response
@@ -63,7 +64,7 @@ class UserServiceImplementation implements IUserService{
         }
     }
 
-    public GetUserByRoleId =async(role_id:string) :Promise< users|any > => {
+    public GetUserByRoleId =async(role_id:string) :Promise<userType|null|{error:string,status:number}|undefined>=> {
         if(role_id !== null ||role_id !== undefined || role_id !== ":id"){
             let response = await this.repository?.GetUserByRoleId(role_id);
             return response
@@ -73,7 +74,7 @@ class UserServiceImplementation implements IUserService{
             
         }
     }
-    public GetUserByName = async (name: string): Promise<users|any> =>{
+    public GetUserByName = async (name: string): Promise<userType|null|{error:string,status:number}|undefined> =>{
         if(name == null || name == undefined){
             return {error:"name is required",status:400}
         }else{
@@ -82,29 +83,29 @@ class UserServiceImplementation implements IUserService{
         }
     }
 
-    public GetUserByEmail = async(email: string): Promise<users|any>=> {
+    public GetUserByEmail = async(email: string): Promise<userType|null|{error:string,status:number}|undefined>=> {
         if(email == null || email == undefined){
             return {error:"email is required",status:400}
         }else{
             let response = await this.repository?.GetUserByEmail(email);
-            return response as unknown as users
+            return response 
         }
         
        
     }
     
-    public GetUserByCompanyId = async(page:number,limit:number,keyword:string,filterBy:string,company_id : string):Promise<{count:number,rows:Array<users>}|any>=>{
-        if(page == null || page == undefined || limit == null || limit == undefined || page == 0 || limit == 0||company_id == null && company_id == undefined){
-            page = 1;
-            limit = 10;
+    public GetUserByCompanyId = async(company_id : string):Promise<userType|null|{error:string,status:number}|undefined>=>{
+       if( company_id!== null ||company_id !== undefined || company_id !== ":id"){
+            let response = await this.repository?.GetUserByRoleId(company_id);
+            return response
         }else{
-            let offset = (page - 1) * limit;
-            let response = await this.repository?.GetUserByCompanyId(offset,limit,keyword,filterBy,company_id)
-            return response;
+            let data = {error:"id is required",status:400}
+            return data
+            
         }
     }
 
-    public DeleteUser = async(id:string) :Promise<users|any> => {
+    public DeleteUser = async(id:string) :Promise<userType|null|{error:string,status:number}|undefined> => {
         if(id == null || id == undefined){
             return {error:"id is required",status:400}
         }else{

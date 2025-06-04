@@ -5,19 +5,25 @@ import bcrypt from 'bcryptjs'
 import data from "../../config";
 import { Readable } from "stream";
 import fs from 'fs';
-import { users } from "@prisma/client";
-
+import { Prisma, users } from "@prisma/client";
+import { userType } from "../../types/userType";
+import RoleServiceImplementation from "../service/implementation/RoleServiceImplementation";
+import CompanyServiceImplementation from "../service/implementation/companyServiceImplementation";
 
 
 class UserController{
     user_service: UserServiceImplementation
+    role_service: RoleServiceImplementation
+    company_service:CompanyServiceImplementation
 
 
     constructor(){
         this.user_service= new UserServiceImplementation();
+        this.role_service = new RoleServiceImplementation();
+        this.company_service = new CompanyServiceImplementation();
     }
     public CreateUser = async(req:Request,res:Response)=>{
-        let userData =req.body
+        let userData =req.body 
         console.log(userData)
         let destination = "src/upload/users"
         let profile_image : File[] | { [fieldname: string]: File[]; } | any = req.file
@@ -25,11 +31,13 @@ class UserController{
             res.status(400).json({error:"please provide the data"})
         }else{
             try {
-                let userValue = await this.CreateUserData(userData);
+                let userValue:userType = await this.CreateUserData(userData );
                 let isExist = await this.user_service.GetUserByEmail(userData.email);
+                let validateRole = await this.role_service.GetRoleById(userData.role_id);
+                let validateCompany = await this.company_service.GetCompanyById(userData.company_id)
                 if(isExist == null || isExist == undefined){
-                    if(userValue.role_id == null || userValue.role_id == undefined){
-                        res.status(400).json({error:"Please select role for user"});
+                    if(validateRole == null || validateRole == undefined || validateCompany == null || validateCompany == undefined){
+                        res.status(400).json({error:"Please select role and company for user properly"});
                     }else{
                         if(profile_image.mimetype?.split("/")[1] == "jpg" || profile_image.mimetype?.split("/")[1] == "png" || profile_image.mimetype?.split("/")[1] == "jpeg"){
                             let stream = Readable.from(profile_image.buffer as Buffer);
@@ -78,7 +86,7 @@ class UserController{
         if(email == null || password == null||password == undefined || email == undefined){
             res.status(401).json({errors :"please enter email or password"});
         }else{
-            let isExist = await this.user_service.GetUserByEmail(email);
+            let isExist : userType|null|any|undefined = await this.user_service.GetUserByEmail(email );
             if(isExist == null){
                 res.status(400).json({error:"Account doesn't Exist"});
             }else{
@@ -86,7 +94,7 @@ class UserController{
                     let token = jwt.sign(
                         { id: isExist.id },
                         data.jwt_secret,
-                        { expiresIn: "1day" }
+                        { expiresIn: "30day" }
 
                     )
                     let refreshToken = jwt.sign(
@@ -158,13 +166,13 @@ class UserController{
             res.status(400).json({error:"please provide id"})
         }else{
             try {
-                let userValue = await this.CreateUserData(userData)
-                let isExist = await this.user_service.GetUserById(id)
+                let userValue : userType= await this.CreateUserData(userData)
+                let isExist:Prisma.usersCreateInput|undefined|null|userType|any= await this.user_service.GetUserById(id) 
                 if(isExist == null || isExist == undefined){
                     res.status(400).json({error: "please select user properly"})
                 }else{
                     if(profile_image == null || profile_image == undefined){
-                        let data  :[affectedcount :number]= await this.user_service.UpdateUser(id,userValue);       
+                        let data  :{error:string,status:number}|userType|undefined= await this.user_service.UpdateUser(id,userValue);       
                         if(data){
                             res.status(200).json({message:"Updated Successfully"});
                         }else{
@@ -180,17 +188,11 @@ class UserController{
                                 let writer = fs.createWriteStream(filePath);
                                 streamData.pipe(writer);
                                 userValue["profile_image"] = `${process.env.server}/${filePath}`
-                                let data :{error?:string,status:400}|[affectedCount?:number]|undefined = await this.user_service.UpdateUser(id,userValue);       
-                                if(data instanceof Array){
-                                    if(typeof data == "number"){
-                                        if(data > 0){
-                                            res.status(200).json({message:"Updated Successfully"});
-                                        }else{
-                                            res.status(400).json({error:"Cannot update please try again"});
-                                        }
-                                    }
+                                let data :{error:string,status:number}|userType|undefined= await this.user_service.UpdateUser(id,userValue);       
+                                if(data){
+                                    res.status(200).json({message:"Updated Successfully"});
                                 }else{
-                                    res.status(400).json({error:"user not updated please try again"})
+                                    res.status(400).json({error:"Cannot update please try again"});
                                 }
                             }else{
                                 res.status(400).json({error_message:"Plese select either png or jpeg or jpg file format"})
@@ -205,7 +207,7 @@ class UserController{
                             let writer = fs.createWriteStream(filePath);
                             streamData.pipe(writer);
                             userValue["profile_image"] = `${process.env.server}/${filePath}`
-                            let data :{error?:string,status:400}|[affectedCount?:number]|undefined = await this.user_service.UpdateUser(id,userValue); 
+                            let data :{error:string,status:number}|userType|undefined = await this.user_service.UpdateUser(id,userValue); 
                                 if(data){
                                     res.status(200).json({message:"Updated Successfully"});
                                 }else{
@@ -249,6 +251,7 @@ class UserController{
                     res.status(200).json({data: userResponse});
                 }
             } catch (error : any) {
+                console.log(error)
                 res.status(400).json({error:error.message});
             }
         }
@@ -260,25 +263,21 @@ class UserController{
         let filterBy =req.query.filterBy as string;
         keyword = keyword == null || keyword == undefined ? "": keyword
         try {
-            let userResponse :{count : number,rows:object[]} | {error ?: string ,status?:number } = await this.user_service.GetAllUsers(page,limit,keyword,filterBy);
+            let userResponse  = await this.user_service.GetAllUsers(page,limit,keyword,filterBy);
             if(userResponse == null || userResponse == undefined || page == undefined || limit == undefined||page == null || limit == null){
                 res.status(200).json({data:userResponse});
             }else{
                 res.status(200).json({data : userResponse});
             }
         } catch (error:any) {
+            console.log(error)
             res.status(400).json({error:error.message});
         }
     }
     public GetUserByCompanyId = async(req:Request,res:Response)=>{
         let company_id=req.params.company_id;
-        let page = Number(req.query.page );
-        let limit = Number(req.query.limit);
-        let keyword = req.query.keyword as string;
-        let filterBy =req.query.filterBy as string;
-        keyword = keyword == null || keyword == undefined ? "": keyword
-        try {
-            let userResponse= await this.user_service.GetUserByCompanyId(page,limit,keyword,filterBy,company_id);
+        try{
+            let userResponse= await this.user_service.GetUserByCompanyId(company_id);
             if(userResponse == null || userResponse == undefined){
                 res.status(200).json({data:userResponse});
             }
@@ -295,11 +294,12 @@ class UserController{
             res.status(400).json({error:"please provide id"})
         }else{
             try {
-                let userResponse = await this.user_service.DeleteUser(id)
-                if(userResponse == 0){
-                    res.status(400).json({error:"couldnot able to delete please try again later"})
-                }else{
+                let userResponse :userType | { error: string; status: number; } | null | undefined= await this.user_service.DeleteUser(id)
+                if(userResponse){
                     res.status(200).json({message:"deleted successfully"})
+                    
+                }else{
+                    res.status(400).json({error:"couldnot able to delete please try again later"})
                 }
             } catch (error:any) {
                 res.status(400).json({error:error.message})
@@ -316,13 +316,13 @@ class UserController{
             if(ids.length > 0){
                 try {
                     for await(let id of ids){
-                        let user = await this.user_service.GetUserById(id)
+                        let user : userType| undefined|null|any= await this.user_service.GetUserById(id)
                         if(user != null || user != undefined){
                             let response = await this.user_service.DeleteUser(id);
                             if(response){
-                                success.push(`${user.subject} Deleted Successfully`)
+                                success.push(`${user.name} Deleted Successfully`)
                             }else{
-                                errors.push(`${user.subject} Cannot deleted please try again`)
+                                errors.push(`${user.name} Cannot deleted please try again`)
                             }
                         }
                     }
@@ -343,7 +343,7 @@ class UserController{
         }
     
     }
-    private CreateUserData = async (userData:users)=>{
+    private CreateUserData = async (userData:userType)=>{
         let user ={
             id:userData.id,
             name :userData.name,
@@ -353,6 +353,7 @@ class UserController{
             email :userData.email,
             role_id :userData.role_id,
             company_id :userData.company_id,
+            type:userData.type,
             status: userData.status,
             mobile_phone: userData.mobile_phone,
             office_phone :userData.office_phone,
@@ -374,7 +375,6 @@ class UserController{
             declined_date: new Date(userData.declined_date),
             country_id :Number(userData.country_id) ,
             state_id: Number(userData.state_id),
-            type: userData.type,
             city_id :Number(userData.city_id),
             date_of_birth :new Date(userData.date_of_birth),
             zip_code :userData.zip_code,

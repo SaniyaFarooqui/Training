@@ -1,25 +1,25 @@
-import { users } from "@prisma/client";
+import { Prisma, users } from "@prisma/client";
+import { userType } from "../../../types/userType";
 
 
 interface IUserService{
 
-    CreateUser(userData: users):Promise<users>
+    CreateUser(userData: userType):Promise<userType|{error:string,status:number}|undefined>
 
-    UpdateUser(id:string,userData:users):Promise<users>
+    UpdateUser(id:string,userData:userType):Promise<userType|{error:"id is required",status:400}|undefined>
 
-    GetAllUsers(page:number,limit:number,keyword:string,filterBy:string):Promise<{count:number,rows:Array<users>}>
+    GetAllUsers(page:number,limit:number,keyword:string,filterBy:string):Promise<Prisma.usersGetPayload<{include:{company:true,department:true,role:{include:{permission:true}}}}>[]|undefined|null>
 
-    GetUserById(id:string):Promise<users>
+    GetUserById(id:string):Promise<userType|null|{error:string,status:number}|undefined>
 
-    GetUserByRoleId(role_id:string):Promise<users>
+    GetUserByRoleId(role_id:string):Promise<userType|null|{error:string,status:number}|undefined>
 
-    GetUserByName(name:string) :Promise<users>
+    GetUserByName(name:string) :Promise<userType|null|{error:string,status:number}|undefined>
 
-    GetUserByEmail(email:string) :Promise<users>
+    GetUserByEmail(email:string) :Promise<userType|null|{error:string,status:number}|undefined>
+    GetUserByCompanyId(company_id:string):Promise<userType|null|{error:string,status:number}|undefined>
 
-    GetUserByCompanyId(page:number,limit:number,keyword:string,filterBy:string,company_id:string):Promise<{count:number,rows:Array<users>}>
-
-    DeleteUser(id:string):Promise<users>
+    DeleteUser(id:string):Promise<userType|null|{error:string,status:number}|undefined>
 }
 
 export default IUserService
