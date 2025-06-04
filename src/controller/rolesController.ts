@@ -58,7 +58,7 @@ class RoleController{
         }else{
             try {
                 let permission : permissions = roleData.permissions as permissions
-                let isExist:roles = await this.role_service.GetRoleById(id)
+                let isExist:roles|{error:string,status:number}|undefined|null|any= await this.role_service.GetRoleById(id)
                 if(isExist == null || isExist == undefined){
                     res.status(400).json({error: "please select role properly"})
                 }else{
@@ -68,8 +68,10 @@ class RoleController{
                     }else{
                         let permissionResponse  = await this.Updatepermission(isExist.permissionId,permission);
                         if(typeof permissionResponse == "string"){
-                            let roleResponse:roles = await this.role_service.UpdateRole(id,role) 
-                            res.status(200).json({message: "updated successfully"})
+                            let roleResponse:roles |undefined|{error:string,status:number}= await this.role_service.UpdateRole(id,role) 
+                            if(roleResponse){
+                                res.status(200).json({message: "updated successfully"})
+                            }   
                         }else{
                             res.status(400).json({error: "could not able to update"})
                         }
@@ -120,7 +122,7 @@ class RoleController{
         let filterBy =req.query.filterBy as string;
         keyword = keyword == null || keyword == undefined ? "": keyword
         try {
-            let roleResponse :{count : number,rows:object[]} | {error ?: string ,status?:number } = await this.role_service.GetAllRoles(page,limit,keyword,filterBy);
+            let roleResponse  = await this.role_service.GetAllRoles(page,limit,keyword,filterBy);
             if(roleResponse == null || roleResponse == undefined){
                 res.status(200).json({data : roleResponse});
             }else{
@@ -137,10 +139,10 @@ class RoleController{
         }else{
             try {
                 let roleResponse = await this.role_service.DeleteRole(id)
-                if(roleResponse == 0){
-                    res.status(400).json({error:"couldnot able to delete please try again later"})
+                if(roleResponse){
+                   res.status(200).json({message:"deleted successfully"})
                 }else{
-                    res.status(200).json({message:"deleted successfully"})
+                    res.status(400).json({error:"couldnot able to delete please try again later"})
                 }
             } catch (error:any) {
                 res.status(400).json({error:error.message})
@@ -161,9 +163,9 @@ class RoleController{
                         if(role != null || role != undefined){
                             let response = await this.role_service.DeleteRole(id);
                             if(response){
-                                success.push(`${role.subject} Deleted Successfully`)
+                                success.push(`${role.name} Deleted Successfully`)
                             }else{
-                                errors.push(`${role.subject} Cannot deleted please try again`)
+                                errors.push(`${role.name} Cannot deleted please try again`)
                             }
                         }
                     }
@@ -186,15 +188,15 @@ class RoleController{
     }
 
     private Createpermission = async (permission:permissions)=>{
-        let permissionData : permissions = await this.permission_service.Createpermission(permission)
+        let permissionData  = await this.permission_service.Createpermission(permission)
         if(permissionData == null || permissionData == undefined){
             return {message:"Something went wrong please try again",status:400}
         }else{
             return permissionData.id
         }
     }
-    private Updatepermission = async (id:string,permission:permissions ) :Promise<{message:string,status:number}|string> => {
-        let permissionData :permissions = await this.permission_service.Updatepermission(id,permission)
+    private Updatepermission = async (id:string,permission:permissions )=> {
+        let permissionData :any= await this.permission_service.Updatepermission(id,permission)
         if(permissionData){
             return permissionData.id
         }else{

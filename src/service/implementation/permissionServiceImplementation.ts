@@ -1,7 +1,8 @@
 import PermissionRepository from "../../repository/permissions";
-import { permissions } from "@prisma/client";
+import { permissions, Prisma } from "@prisma/client";
 import IPermissionService from "../interface/IPermission";
 import { permissionType } from "../../../types/permissiontype";
+import { validate as uuidValidate, validate } from "uuid"
 
 
 class PermissionServiceImplementation implements IPermissionService{
@@ -12,13 +13,13 @@ class PermissionServiceImplementation implements IPermissionService{
         this.repository = new PermissionRepository()
     }
 
-    public Createpermission = async(permissionData: permissions): Promise<permissions|any> =>{
+    public Createpermission = async(permissionData:permissions ): Promise<Prisma.permissionsCreateInput|undefined> =>{
         let response = await this.repository?.Createpermission(permissionData)
         return response 
         
     }
 
-    public Updatepermission = async(id:string,permissionData:permissions) :Promise<permissions|any> => {
+    public Updatepermission = async(id:string,permissionData:permissions) :Promise<Prisma.permissionsCreateInput|undefined|{error:string,status:number}>  => {
         if(id == null || id == undefined){
             return {error:"id is required",status:400}
         }else{
@@ -27,7 +28,7 @@ class PermissionServiceImplementation implements IPermissionService{
         }
     }
 
-    public GetAllpermissions = async(page:number,limit:number,keyword:string,filterBy:string) :Promise<{count:number,rows:Array<permissions>}|any> => {
+    public GetAllpermissions = async(page:number,limit:number,keyword:string,filterBy:string) :Promise<permissions[]|undefined|null|any>  => {
         if(page == null || page == undefined || limit == null || limit == undefined || page == 0 || limit == 0){
             page = 1;
             limit = 10;
@@ -37,7 +38,7 @@ class PermissionServiceImplementation implements IPermissionService{
         return response;
     }
 
-    public GetpermissionById = async(id:string) :Promise< permissions|any > => {
+    public GetpermissionById = async(id:string) :Promise<permissions|null|undefined|{ error: string; status: number}|any> => {
         if(id !== null ||id !== undefined || id !== ":id"){
             let response = await this.repository?.GetpermissionById(id);
             return response
@@ -48,6 +49,7 @@ class PermissionServiceImplementation implements IPermissionService{
         }
     }
 
+    
     public Deletepermission = async(id:string) :Promise<permissions|any> => {
         if(id == null || id == undefined){
             return {error:"id is required",status:400}

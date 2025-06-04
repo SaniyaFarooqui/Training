@@ -1,5 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { users } from "../model/users";
+import { userType } from "../../types/userType";
 
 class usersRepository{
     prisma:PrismaClient
@@ -7,13 +8,13 @@ class usersRepository{
     constructor(){
         this.prisma = new PrismaClient()
     }
-    public CreateUser = async(userData:users):Promise<users|any>=>{
+    public CreateUser = async(userData:Prisma.usersCreateInput):Promise<userType>=>{
         return await this.prisma.users.create({data:userData})
     }
-    public UpdateUser = async(id:string,userData:users):Promise<users|any>=>{
+    public UpdateUser = async(id:string,userData:Prisma.usersCreateInput):Promise<userType|{error:"id is required",status:400}|undefined>=>{
         return await this.prisma.users.update({where:{id:id},data:userData})
     }
-    public GetAllUsers = async(page:number,limit:number,keyword:string,filterBy:string):Promise<{count:number,rows:Array<users>}|any>=>{
+    public GetAllUsers = async(page:number,limit:number,keyword:string,filterBy:string):Promise<Prisma.usersGetPayload<{include:{company:true,department:true,role:{include:{permission:true}}}}>[]|undefined|null>=>{
         let Users = await this.prisma.users.findMany({
             where:{
                 OR:[
@@ -31,7 +32,7 @@ class usersRepository{
             take:limit,
             include:{
                 company:true,
-                //department:true,
+                department:true,
                 role:{
                     include:{
                         permission:true
@@ -39,24 +40,24 @@ class usersRepository{
                 }
             }
         })
-        let count = await this.prisma.users.count()
-        return {count:count,rows:Users}
+        
+        return Users
     }
-    public GetUserById = async(id:string):Promise<users|any>=>{
+    public GetUserById = async(id:string):Promise<userType|any>=>{
         return await this.prisma.users.findUnique({
             where:{
                 id:id
             }
         })
     }
-    public GetUserByRoleId = async(role_id:string):Promise<users|any>=>{
+    public GetUserByRoleId = async(role_id:string):Promise<userType|null>=>{
         return await this.prisma.users.findFirst({
             where:{
                 role_id:role_id
             }
         })
     }
-    public GetUserByName = async (name:string) :Promise<users| any > => {
+    public GetUserByName = async (name:string) :Promise<userType|null > => {
         return await this.prisma.users.findFirst({
             where:{
                 name:name
@@ -64,40 +65,21 @@ class usersRepository{
         })
     }
 
-    public GetUserByEmail = async (email:string) :Promise<users|any> => {
+    public GetUserByEmail = async (email:string) :Promise<userType|null> => {
         return await this.prisma.users.findFirst({
             where:{
                 email:email
             }
         })
     }
-    public GetUserByCompanyId = async(page:number,limit:number,keyword:string,filterBy:string,company_id : string):Promise<{count:number,rows:Array<users>|any}>=>{
-        let users =  await this.prisma.users.findMany({
+    public GetUserByCompanyId = async(company_id : string):Promise<userType|null>=>{
+         return await this.prisma.users.findFirst({
             where:{
-                company_id:company_id,
-                OR:[{
-                    name:{
-                            contains:keyword,
-                            mode:'insensitive'
-                        }
-                    },
-                    {
-                        surname:{
-                            contains:keyword,
-                            mode:'insensitive'
-                        }
-                    }
-                ],
-                status:filterBy
-                
-            },
-            skip:page,
-            take:limit
+                company_id:company_id
+            }
         })
-        let data = await this.prisma.users.count()
-        return {count:data,rows:users}
     }
-    public DeleteUser =async(id:string):Promise<users|any>=>{
+    public DeleteUser =async(id:string):Promise<userType>=>{
         return await this.prisma.users.delete({
             where:{
                 id:id

@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { roles } from "@prisma/client";
 
 class rolesRepository{
@@ -13,7 +13,7 @@ class rolesRepository{
     public UpdateRole = async(id:string,roleData:roles):Promise<roles>=>{
         return await this.prisma.roles.update({where:{id:id},data:roleData})
     }
-    public GetAllRoles = async(page:number,limit:number,keyword:string,filterBy:string):Promise<{count:number,rows:Array<roles>}>=>{
+    public GetAllRoles = async(page:number,limit:number,keyword:string,filterBy:string):Promise<Prisma.rolesGetPayload<{include:{permission:true}}>[]|undefined>=>{
         let roles = await this.prisma.roles.findMany({
             where:{
                 OR:[
@@ -32,8 +32,7 @@ class rolesRepository{
                 permission:true
             }
         })
-        let count = await this.prisma.roles.count()
-        return {count:count,rows:roles}
+      return roles
     }
     public GetRoleById = async(id:string):Promise<roles|null>=>{
         return await this.prisma.roles.findUnique({

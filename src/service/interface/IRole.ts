@@ -1,17 +1,17 @@
-import { roles } from "@prisma/client";
+import { Prisma, roles } from "@prisma/client";
 
 
 interface IRoleService{
 
-    CreateRole(roleData: roles):Promise<roles>
+    CreateRole(roleData: roles):Promise<roles|{error:string,status:number}|undefined> 
 
-    UpdateRole(id:string,roleData:roles):Promise<roles>
+    UpdateRole(id:string,roleData:roles):Promise<roles|{error:string,status:number}|undefined> 
 
-    GetAllRoles(page:number,limit:number,keyword:string,filterBy:string):Promise<{count:number,rows:Array<roles>}>
+    GetAllRoles(page:number,limit:number,keyword:string,filterBy:string):Promise<Prisma.rolesGetPayload<{include:{permission:true}}>[]|undefined>
 
-    GetRoleById(id:string):Promise<roles>
+    GetRoleById(id:string):Promise< roles|{error:string,status:number}|null|undefined >
     
-    DeleteRole(id:string):Promise<roles>
+    DeleteRole(id:string):Promise< roles|{error:string,status:number}|null|undefined >
 }
 
 export default IRoleService

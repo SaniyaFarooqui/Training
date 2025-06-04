@@ -9,6 +9,7 @@ const TrainingStatusCronJobs = async () => {
         for await(let data of  training){
             let startDate = new Date(data.startDate).getDate()
             let currentDate = new Date().getDate()
+            let endDate = new Date(data.endDate).getDate()
             console.log(startDate)
             console.log(currentDate)
 
@@ -16,6 +17,12 @@ const TrainingStatusCronJobs = async () => {
                 let updatedData = await trainingService.UpdatetrainingStatus(data.id,"ongoing");
                 console.log(updatedData)
                 console.log(`Cronjob has been performed in the training`, data.subject);    
+            }else if (startDate > currentDate){
+                let updatedData = await trainingService.UpdatetrainingStatus(data.id,"upcoming");
+                console.log(updatedData)
+            }else if(endDate == currentDate){
+                let updatedData = await trainingService.UpdatetrainingStatus(data.id,"completed");
+                console.log(updatedData)
             }
             console.log(`Cronjob has been performed in the training`);
         }
