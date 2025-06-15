@@ -65,6 +65,17 @@ class trainingServiceImplementation implements ITraningService{
         }
     }
 
+    public GetTrainingCountById = async(id:string) :Promise< trainings  | null | {error:string,status:number}> => {
+        if(id !== null ||id !== undefined || id !== ":id"){
+            let response = await this.repository?.GetTrainingCountById(id);
+            return response as trainings
+        }else{
+            let data = {error:"id is required",status:400}
+            return data
+            
+        }
+    }
+
     public GetTrainingByStatus  = async(status:$Enums.status|Prisma.EnumstatusFilter<"trainings">) :Promise< trainings|any > => {
         if(status !== null ||status !== undefined){
             let response = await this.repository?.GetTrainingByStatus(status);
