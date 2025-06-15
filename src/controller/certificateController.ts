@@ -1,25 +1,101 @@
 import { $Enums, certificate_status } from "@prisma/client";
 import CertificateServiceImplementation from "../service/implementation/certificateServiceImplementation";
 import { Response,Request } from "express";
+import trainingServiceImplementation from "../service/implementation/trainingServiceImplementation";
+import UserServiceImplementation from "../service/implementation/UserServiceImplementation";
+import Certificate_templateServiceImplementation from "../service/implementation/certificate_templateServiceImplementation";
+import CompanyServiceImplementation from "../service/implementation/companyServiceImplementation";
+import { Readable } from "nodemailer/lib/xoauth2";
+import fs from "fs"
+import moment from "moment";
 
 class CertificateController{
     Certificate_service: CertificateServiceImplementation
+    trainingService: trainingServiceImplementation;
+    userService: UserServiceImplementation;
+    templateService: Certificate_templateServiceImplementation;
+    companyService: CompanyServiceImplementation;
+    
 
     constructor(){
         this.Certificate_service= new CertificateServiceImplementation();
+        this.trainingService = new trainingServiceImplementation()
+        this.userService = new UserServiceImplementation()
+        this.templateService = new Certificate_templateServiceImplementation()
+        this.companyService = new CompanyServiceImplementation()
     }
+
     public CreateCertificate = async(req:Request,res:Response)=>{
-        let CertificateData =req.body
+        let CertificateData = req.body
+        let user_id = req.user.id as string
+        let destination = "src/upload/certificatess"
         if(CertificateData == null || CertificateData == undefined){
             res.status(400).json({error:"please provide the data"})
         }else{
             try {
-                let CertificateResponse = await this.Certificate_service.CreateCertificate(CertificateData) 
-                if(CertificateResponse == 0){
-                    res.status(400).json({error:"couldnot able to create please try again"})
+                if(CertificateData.training_id != null){
+                    let training = await this.trainingService.GetTrainingById(CertificateData.training_id);
+                    if(training){
+                        if(CertificateData.user_id){
+                            let user = await this.userService.GetUserById(CertificateData.user_id);
+                            if(user){
+                                if(CertificateData.company_id){
+                                    let company = await this.companyService.GetCompanyById(CertificateData.company_id);
+                                    if(company){
+                                        if(CertificateData.template_id){
+                                            let certificate_number = await this.CertificteNumber();
+                                            let template = await this.templateService.GetCertificate_templateById(CertificateData.template_id);
+                                            if(template){
+                                                CertificateData = JSON.parse(JSON.stringify(CertificateData))
+                                                let html_string = await template.html_code.toString()
+                                                html_string = html_string.replace("{{engineer}}", CertificateData.user_name);
+                                                html_string = html_string.replace("{{company}}", CertificateData.company_name);
+                                                html_string = html_string.replace("{{Training}}", training.subject);
+                                                html_string = html_string.replace("{{validTo}}", moment(CertificateData.valid_to).format('YYYY-MM-DD'));
+                                                html_string = html_string.replace("{{issueDate}}", moment(CertificateData.issued_date).format('YYYY-MM-DD'));
+                                                html_string = html_string.replace("{{certificateNumber}}", certificate_number);
+
+                                                
+                                                CertificateData["certificate_no"] = String(certificate_number)
+                                                CertificateData["issued_by"] = user_id
+                                                console.log(CertificateData)
+                                                let data = await this.Certificate_service.CreateCertificate(CertificateData);
+                                                if(data){
+                                                    let buffer = Buffer.from(html_string);
+                                                    let stream = Readable.from(buffer);
+                                                    let filename = template.name.replaceAll(" ","_");
+                                                    let filePath = `${destination}/${filename+"_"+this.getTimeStamp()+".html"}`
+                                                    let writer = fs.createWriteStream(filePath);
+                                                    stream.pipe(writer);
+                                                    res.status(200).json({message:"Certificate created successfully"})
+                                                }else{
+                                                    res.status(400).json({message:"Certificate cannot be created please try again"})
+                                                }
+                                            }else{
+                                                res.status(400).json({error:"please select template properly, no such template exist"});                
+                                            }
+                                        }else{
+                                            res.status(400).json({error:"please select template properly"});            
+                                        }
+                                    }else{
+                                        res.status(400).json({error:"please select company properly no such company exist"});            
+                                    }  
+                                }else{
+                                    res.status(400).json({error:"please select company to create certificate"});        
+                                }
+                            }else{
+                                res.status(400).json({error:"no such user exists please select user properly"});        
+                            }     
+                        }else{
+                            res.status(400).json({error:"please select user to create certificate"});        
+                        }
+                    }else{
+                        res.status(400).json({error:"no such training exists please select training properly"});    
+                    }
                 }else{
-                    res.status(200).json({message:"created successfully"})
-                }  
+                    res.status(400).json({error:"please select training to create certificate"});
+                }
+                
             } catch (error:any) { 
                 if(error.errors){
                     let validationerror = []
@@ -77,7 +153,7 @@ class CertificateController{
         }
     }
 
-    public UpdateTrainingStatus = async(req:Request,res:Response)=>{
+    public UpdateCertificateStatus = async(req:Request,res:Response)=>{
         let id = req.params.id;
         let certificate_status = req.body.status as certificate_status;
         if(id == null || id ==undefined|| id ==":id"){
@@ -248,6 +324,14 @@ class CertificateController{
         }else{
 
         }
+    }
+
+    private CertificteNumber = async() => {
+        return Math.floor(1000000000 + Math.random() * 9000000000);
+    }
+
+    private getTimeStamp = () =>{
+        return Math.floor(Date.now() / 1000)
     }
 }
 

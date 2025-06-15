@@ -1,8 +1,6 @@
 import PermissionRepository from "../../repository/permissions";
 import { permissions, Prisma } from "@prisma/client";
 import IPermissionService from "../interface/IPermission";
-import { permissionType } from "../../../types/permissiontype";
-import { validate as uuidValidate, validate } from "uuid"
 
 
 class PermissionServiceImplementation implements IPermissionService{

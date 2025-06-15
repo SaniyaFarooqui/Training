@@ -15,6 +15,8 @@ interface ITraningService{
 
     GetTrainingById(id:string):Promise<trainings>
 
+    GetTrainingCountById(id:string) :Promise< trainings | null |{error:string,status:number}>
+
     GetTrainingByStatus(status:$Enums.status):Promise<trainings>
     
     DeleteTraining(id:string):Promise<trainings>
