@@ -77,7 +77,7 @@ class CertificateController{
         }
     }
 
-    public UpdateTrainingStatus = async(req:Request,res:Response)=>{
+    public UpdateCertificateStatus = async(req:Request,res:Response)=>{
         let id = req.params.id;
         let certificate_status = req.body.status as certificate_status;
         if(id == null || id ==undefined|| id ==":id"){
