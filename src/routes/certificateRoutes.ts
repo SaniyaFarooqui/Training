@@ -1,11 +1,12 @@
 import { Router } from "express";
 import CertificateController from "../controller/certificateController";
+import isAuthenticated from "../middlewares/authetication";
 
 
 let certificateController= new CertificateController();
 let CertificateRouter :Router = Router();
 
-CertificateRouter.post("/CreateCertificate",certificateController.CreateCertificate)
+CertificateRouter.post("/CreateCertificate",isAuthenticated,certificateController.CreateCertificate)
 CertificateRouter.put("/UpdateCertificate/:id",certificateController.UpdateCertificate)
 CertificateRouter.get("/GetAllCertificates",certificateController.GetAllCertificates)
 CertificateRouter.get("/GetCertificateById/:id",certificateController.GetCertificateById)

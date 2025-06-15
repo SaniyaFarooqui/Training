@@ -7,6 +7,7 @@ import Certificate_templateServiceImplementation from "../service/implementation
 import CompanyServiceImplementation from "../service/implementation/companyServiceImplementation";
 import { Readable } from "nodemailer/lib/xoauth2";
 import fs from "fs"
+import moment from "moment";
 
 class CertificateController{
     Certificate_service: CertificateServiceImplementation
@@ -14,7 +15,7 @@ class CertificateController{
     userService: UserServiceImplementation;
     templateService: Certificate_templateServiceImplementation;
     companyService: CompanyServiceImplementation;
-    destination = "/src/upload/certificate";
+    
 
     constructor(){
         this.Certificate_service= new CertificateServiceImplementation();
@@ -27,11 +28,12 @@ class CertificateController{
     public CreateCertificate = async(req:Request,res:Response)=>{
         let CertificateData = req.body
         let user_id = req.user.id as string
+        let destination = "src/upload/certificatess"
         if(CertificateData == null || CertificateData == undefined){
             res.status(400).json({error:"please provide the data"})
         }else{
             try {
-                if(CertificateData.training_id){
+                if(CertificateData.training_id != null){
                     let training = await this.trainingService.GetTrainingById(CertificateData.training_id);
                     if(training){
                         if(CertificateData.user_id){
@@ -44,22 +46,25 @@ class CertificateController{
                                             let certificate_number = await this.CertificteNumber();
                                             let template = await this.templateService.GetCertificate_templateById(CertificateData.template_id);
                                             if(template){
+                                                CertificateData = JSON.parse(JSON.stringify(CertificateData))
                                                 let html_string = await template.html_code.toString()
-                                                html_string.replace("{{engineer}}",CertificateData.username)
-                                                html_string.replace("{{company}}",CertificateData.company_name)
-                                                html_string.replace("{{Training}}",training.subject)
-                                                html_string.replace("{{validTo}}",CertificateData.valid_to)
-                                                html_string.replace("{{issuedDate}}",CertificateData.issued_date)
-                                                html_string.replace("{{certificateNo}}",certificate_number)
+                                                html_string = html_string.replace("{{engineer}}", CertificateData.user_name);
+                                                html_string = html_string.replace("{{company}}", CertificateData.company_name);
+                                                html_string = html_string.replace("{{Training}}", training.subject);
+                                                html_string = html_string.replace("{{validTo}}", moment(CertificateData.valid_to).format('YYYY-MM-DD'));
+                                                html_string = html_string.replace("{{issueDate}}", moment(CertificateData.issued_date).format('YYYY-MM-DD'));
+                                                html_string = html_string.replace("{{certificateNumber}}", certificate_number);
+
                                                 
-                                                CertificateData["certificate_no"] = certificate_number
+                                                CertificateData["certificate_no"] = String(certificate_number)
                                                 CertificateData["issued_by"] = user_id
+                                                console.log(CertificateData)
                                                 let data = await this.Certificate_service.CreateCertificate(CertificateData);
                                                 if(data){
                                                     let buffer = Buffer.from(html_string);
                                                     let stream = Readable.from(buffer);
                                                     let filename = template.name.replaceAll(" ","_");
-                                                    let filePath = `${this.destination}/${filename+"_"+this.getTimeStamp()+".html"}`
+                                                    let filePath = `${destination}/${filename+"_"+this.getTimeStamp()+".html"}`
                                                     let writer = fs.createWriteStream(filePath);
                                                     stream.pipe(writer);
                                                     res.status(200).json({message:"Certificate created successfully"})
