@@ -1,4 +1,4 @@
-import { $Enums, certificates, PrismaClient } from "@prisma/client";
+import { $Enums, certificate_status, certificates, Prisma, PrismaClient } from "@prisma/client";
 
 class certificateRepository{
     prisma:PrismaClient
@@ -13,6 +13,15 @@ class certificateRepository{
 
     public UpdateCertificate = async(id:string,certificate_templateData:certificates):Promise<certificates>=>{
         return await this.prisma.certificates.update({where:{id:id},data:certificate_templateData})
+    }
+
+    public UpdateCertificateStatus = async(id:string,certificate_status:certificate_status):Promise<certificates>=>{
+        return await this.prisma.certificates.update({
+            where:{id:id},
+            data:{
+                status:certificate_status
+            }
+        })
     }
 
     public GetAllCertificates = async(page:number,limit:number,keyword:string,filterBy: $Enums.certificate_status ):Promise<{count:number,rows:Array<certificates>}>=>{
@@ -57,6 +66,23 @@ class certificateRepository{
         })
     }
 
+
+    public GetAllCertificateForCron = async():Promise<Prisma.certificatesGetPayload<{select:{id:true,certificate_name:true,user_name:true,company_name:true,start_date:true,end_date:true}}>[]>=>{
+        let certificate = await this.prisma.certificates.findMany({
+            select:{
+                id:true,
+                certificate_name:true,
+                user_name:true,
+                company_name:true,
+                start_date:true,
+                end_date:true
+            },
+            orderBy:{
+                updatedAt:"desc"
+            }
+        })
+        return certificate
+    }
     public DeleteCertificate =async(id:string):Promise<certificates>=>{
         return await this.prisma.certificates.delete({
             where:{

@@ -1,4 +1,4 @@
-import { $Enums } from "@prisma/client";
+import { $Enums, certificate_status } from "@prisma/client";
 import CertificateServiceImplementation from "../service/implementation/certificateServiceImplementation";
 import { Response,Request } from "express";
 
@@ -76,6 +76,45 @@ class CertificateController{
             }
         }
     }
+
+    public UpdateTrainingStatus = async(req:Request,res:Response)=>{
+        let id = req.params.id;
+        let certificate_status = req.body.status as certificate_status;
+        if(id == null || id ==undefined|| id ==":id"){
+            res.status(404).json({error:"please provide id"})
+        }else{
+            try{
+                let validateStatus =  ["valid","invalid","cancelled"]
+                if(validateStatus.includes(certificate_status)){
+                    let CertificateResponse = await this.Certificate_service.UpdateCertificateStatus(id,certificate_status);
+                    if(CertificateResponse == null || CertificateResponse == undefined){
+                        res.status(400).json({error:"Something went wrong please try again"});
+                    }else{
+                        res.status(200).json({message:`Status Updated Successfully`});
+                    }
+                }else{
+                    res.status(400).json({error:"Please provide valid status"})
+                }
+            }catch ( error: any ) {
+                if(error.errors){
+                    let validationerror : Array<object> = [];
+                    for await(let response of error.errors){
+                        let obj:{path : string , message : string}={
+                            path: "",
+                            message: ""
+                        }
+                        obj.path = response.path;
+                        obj.message = response.message;
+                        validationerror.push(obj);
+                    }
+                    res.status(400).json({errors:validationerror})
+                }else{
+                    res.status(400).json({errors:error.message})
+                }
+            }
+        }
+    }
+
     public GetCertificateById = async (req : Request,res:Response) => {
         let id = req.params.id;
         if(id == null || id == undefined){
