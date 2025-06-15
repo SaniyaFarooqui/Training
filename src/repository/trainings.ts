@@ -127,6 +127,15 @@ class TrainingRepository{
         })
     }
 
+    public GetTrainingCountById = async(id:string) :Promise< trainings | null > => {
+        return this.prisma.trainings.findUnique({
+            where:{
+                id:id
+            }
+        })
+    }
+
+
     public GetTrainingByStatus = async(status:$Enums.status | Prisma.EnumstatusFilter<"trainings">  |undefined) :Promise<{count:number,rows:Array<trainings>}> => {
         let response = await this.prisma.trainings.findMany({
             where:{
