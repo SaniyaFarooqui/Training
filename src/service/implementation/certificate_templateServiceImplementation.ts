@@ -1,6 +1,6 @@
 import ICertificate_templateService from "../interface/ICertificate_template";
 import Certificate_templatesRepository from "../../repository/certificate_template";
-import { certificate_templates } from "@prisma/client";
+import { certificate_templates, Prisma } from "@prisma/client";
 
 
 class Certificate_templateServiceImplementation implements ICertificate_templateService{
@@ -29,7 +29,7 @@ class Certificate_templateServiceImplementation implements ICertificate_template
         }
     }
 
-    public GetAllCertificate_templates = async(page:number,limit:number) :Promise<{count:number,rows:Array<certificate_templates>}|any> => {
+    public GetAllCertificate_templates = async(page:number,limit:number) :Promise<Prisma.certificate_templatesGetPayload<{select:{id:true,filename:true,mimetype:true,name:true,createdAt:true,size:true,encoding:true,updatedAt:true}}>[]|undefined|null|certificate_templates> => {
         if(page == null || page == undefined || limit == null || limit == undefined || page == 0 || limit == 0){
             page = 1;
             limit = 10;
