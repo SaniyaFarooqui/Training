@@ -1,4 +1,4 @@
-import { certificate_templates } from "@prisma/client";
+import { certificate_templates, Prisma } from "@prisma/client";
 
 
 interface ICertificate_templateService{
@@ -7,7 +7,7 @@ interface ICertificate_templateService{
 
     UpdateCertificate_template(id:string,certificate_templateData:certificate_templates):Promise<certificate_templates>
 
-    GetAllCertificate_templates(page:number,limit:number):Promise<{count:number,rows:Array<certificate_templates>}>
+    GetAllCertificate_templates(page:number,limit:number):Promise<Prisma.certificate_templatesGetPayload<{select:{id:true,filename:true,mimetype:true,name:true,createdAt:true,size:true,encoding:true,updatedAt:true}}>[]|undefined|null|certificate_templates>
 
     GetCertificate_templateByName(name:string) :Promise< certificate_templates|any >
 

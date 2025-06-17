@@ -142,7 +142,7 @@ class Certificate_templateController{
         let page = Number(req.query.page );
         let limit = Number(req.query.limit);
         try {
-            let Certificate_templateResponse :{count : number,rows:object[]} | {error ?: string ,status?:number } = await this.Certificate_template_service.GetAllCertificate_templates(page,limit);
+            let Certificate_templateResponse = await this.Certificate_template_service.GetAllCertificate_templates(page,limit);
             if(Certificate_templateResponse == null || Certificate_templateResponse == undefined || page == undefined || limit == undefined||page == null || limit == null){
                 res.status(200).json({data:Certificate_templateResponse});
             }else{

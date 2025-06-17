@@ -16,14 +16,14 @@ class schedule_trainingController {
             try {
                 let isExist = await this.Schedule_trainingService.GetSchedule_trainingByUserAndTrainingId(schedule_trainingData.user_id,schedule_trainingData.training_id)
                 if(isExist == null || isExist == undefined){
+                    res.status(400).json({error:"please provide user and training properly"})
+                }else{
                     let schedule_trainingResponse = await this.Schedule_trainingService.CreateSchedule_training(schedule_trainingData)
                     if(schedule_trainingResponse == null || schedule_trainingResponse == undefined){
                         res.status(400).json({error:"schedule_trainings not created please try again"})
                     }else{
                         res.status(200).json({message:"schedule_trainings created successfully"})
                     }
-                }else{
-                    res.status(409).json({error:`You have already applied for this Training`});
                 }
             } catch (error:any) {
                 if(error.errors){
@@ -56,31 +56,38 @@ class schedule_trainingController {
                    if(isExist == null || isExist == undefined){
                        res.status(400).json({error: "please select training properly"})
                    }else{
-                       let schedule_trainingResponse = await this.Schedule_trainingService.UpdateSchedule_training(id,schedule_trainingData);
-                       if(schedule_trainingResponse == null || schedule_trainingResponse == undefined){
-                           res.status(400).json({error : 'something went wrong please try again'})
-                       }else{
-                       res.status(200).json({message : " updated schedule_trainings successfully"}) 
-                       }
-                   }
-               } catch ( error: any ) {
-                   if(error.errors){
-                       let validationerror : Array<object> = [];
-                       for await(let response of error.errors){
-                           let obj:{path : string , message : string}={
-                               path: "",
-                               message: ""
-                           }
-                           obj.path = response.path;
-                           obj.message = response.message;
-                           validationerror.push(obj);
-                       }
-                       res.status(400).json({errors:validationerror})
-                   }else{
-                       res.status(400).json({errors:error.message})
-                   }
-               }
-           }
+                    if(schedule_trainingData.user_id == null || schedule_trainingData.user_id == undefined || schedule_trainingData.training_id == null || schedule_trainingData.training_id == undefined){
+                        res.status(400).json({ error: "Please provide user_id and training_id to update schedule training" });
+                    }else{
+                       let validate = await this.Schedule_trainingService.GetSchedule_trainingByUserAndTrainingId(schedule_trainingData.training_id,schedule_trainingData.user_id)
+                        if(validate){
+                            let schedule_trainingResponse = await this.Schedule_trainingService.UpdateSchedule_training(id,schedule_trainingData);
+                            if(schedule_trainingResponse == null || schedule_trainingResponse == undefined){
+                                res.status(400).json({error : 'something went wrong please try again'})
+                            }else{
+                                res.status(200).json({message : " updated schedule_trainings successfully"}) 
+                            }
+                        }
+                    }
+                }
+            }catch ( error: any ) {
+                if(error.errors){
+                    let validationerror : Array<object> = [];
+                    for await(let response of error.errors){
+                        let obj:{path : string , message : string}={
+                            path: "",
+                            message: ""
+                        }
+                        obj.path = response.path;
+                        obj.message = response.message;
+                        validationerror.push(obj);
+                    }
+                    res.status(400).json({errors:validationerror})
+                }else{
+                    res.status(400).json({errors:error.message})
+                }
+            }
+        }
     }
 
     public GetSchedule_trainingById =async(req:Request,res:Response)=>{

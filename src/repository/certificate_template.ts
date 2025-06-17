@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { certificate_templates } from "@prisma/client";
 
 class certificate_templatesRepository{
@@ -16,13 +16,23 @@ class certificate_templatesRepository{
         return await this.prisma.certificate_templates.update({where:{id:id},data:certificate_templateData})
     }
 
-    public GetAllCertificate_templates = async(page:number,limit:number):Promise<{count:number,rows:Array<certificate_templates>}>=>{
+    public GetAllCertificate_templates = async(page:number,limit:number):Promise<Prisma.certificate_templatesGetPayload<{select:{id:true,filename:true,mimetype:true,name:true,createdAt:true,size:true,encoding:true,updatedAt:true}}>[]|undefined|null|certificate_templates>=>{
         let certificate_templates = await this.prisma.certificate_templates.findMany({
             skip:page,
-            take:limit
+            take:limit,
+            select:{
+                id:true,
+                name:true,
+                filename:true,
+                mimetype:true,
+                size:true,
+                encoding:true,
+                createdAt:true,
+                updatedAt:true
+            },
+            orderBy:{updatedAt:"desc"}
         })
-        let count = await this.prisma.certificate_templates.count()
-        return {count:count,rows:certificate_templates}
+        return certificate_templates
     }
 
     public GetCertificate_templateById = async(id:string):Promise<certificate_templates|null>=>{

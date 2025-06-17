@@ -8,6 +8,7 @@ import CompanyServiceImplementation from "../service/implementation/companyServi
 import { Readable } from "nodemailer/lib/xoauth2";
 import fs from "fs"
 import moment from "moment";
+import { error } from "console";
 
 class CertificateController{
     Certificate_service: CertificateServiceImplementation
@@ -115,43 +116,98 @@ class CertificateController{
             }
         }
     }
-    public UpdateCertificate = async(req:Request,res:Response)=>{
-        let id = req.params.id
-        let CertificateData = req.body
-        if(id == null || id == undefined){
-            res.status(400).json({error:"please provide id"})
-        }else{
-            try {
-                let isExist = await this.Certificate_service.GetCertificateById(id)
-                if(isExist == null || isExist == undefined){
-                    res.status(400).json({error: "please select Certificate properly"})
-                }else{
-                    let CertificateResponse = await this.Certificate_service.UpdateCertificate(id,CertificateData)
-                    if(CertificateResponse > 0 ){
-                        res.status(200).json({message: "updated successfully"})
-                    }else{
-                        res.status(400).json({error: "could not able to update"})
+    public UpdateCertificate = async (req: Request, res: Response) => {
+    let id = req.params.id;
+    let CertificateData = req.body;
+    let destination = "src/upload/certificatess";
+    if (id == undefined  || id == null) {
+        res.status(400).json({ error: "Please provide id" });
+    } else {
+        try {
+            let isExist = await this.Certificate_service.GetCertificateById(id);
+            if (isExist) {
+                if (CertificateData.training_id) {
+                    let training = await this.trainingService.GetTrainingById(CertificateData.training_id);
+                    if (training) {
+                        if (CertificateData.user_id) {
+                            let user = await this.userService.GetUserById(CertificateData.user_id);
+                            if (user) {
+                                if (CertificateData.company_id) {
+                                    let company = await this.companyService.GetCompanyById(CertificateData.company_id);
+                                    if (company) {
+                                        if (CertificateData.template_id) {
+                                            let template = await this.templateService.GetCertificate_templateById(CertificateData.template_id);
+                                            if (template) {
+                                                CertificateData = JSON.parse(JSON.stringify(CertificateData));
+
+                                                let html_string = await template.html_code.toString();
+                                                html_string = html_string.replace("{{engineer}}", CertificateData.user_name);
+                                                html_string = html_string.replace("{{company}}", CertificateData.company_name);
+                                                html_string = html_string.replace("{{Training}}", training.subject);
+                                                html_string = html_string.replace("{{validTo}}", moment(CertificateData.valid_to).format("YYYY-MM-DD"));
+                                                html_string = html_string.replace("{{issueDate}}", moment(CertificateData.issued_date).format("YYYY-MM-DD"));
+                                                html_string = html_string.replace("{{certificateNumber}}", isExist.certificate_no);
+
+                                                let updatedCertificate = await this.Certificate_service.UpdateCertificate(id, CertificateData);
+                                                if (updatedCertificate) {
+                                                    let buffer = Buffer.from(html_string);
+                                                    let stream = Readable.from(buffer);
+                                                    let filename = template.name.replaceAll(" ", "_");
+                                                    let filePath = `${destination}/${filename + "_" + this.getTimeStamp() + ".html"}`;
+                                                    let writer = fs.createWriteStream(filePath);
+                                                    stream.pipe(writer);
+
+                                                    res.status(200).json({ message: "Certificate updated successfully" });
+                                                } else {
+                                                    res.status(400).json({ error: "Certificate could not be updated" });
+                                                }
+                                            } else {
+                                                res.status(400).json({ error: "No such template exists. Please select template properly" });
+                                            }
+                                        } else {
+                                            res.status(400).json({ error: "Please select template to update certificate" });
+                                        }
+                                    } else {
+                                        res.status(400).json({ error: "No such company exists. Please select company properly" });
+                                    }
+                                } else {
+                                    res.status(400).json({ error: "Please select company to update certificate" });
+                                }
+                            } else {
+                                res.status(400).json({ error: "No such user exists. Please select user properly" });
+                            }
+                        } else {
+                            res.status(400).json({ error: "Please select user to update certificate" });
+                        }
+                    } else {
+                        res.status(400).json({ error: "No such training exists. Please select training properly" });
                     }
+                } else {
+                    res.status(400).json({ error: "Please select training to update certificate" });
                 }
-            } catch (error:any) {
-                if(error.errors){
-                    let validationerror = []
-                    for await(let response of error.errors){
-                        let obj :{path : string,message : string} = {
-                            path: "",
-                            message: ""
-                        };
-                        obj.path = response.path,
-                        obj.message = response.message
-                        validationerror.push(obj);
-                    }
-                    res.status(400).json({errors : validationerror});
-                }else{
-                    res.status(400).json({errors : error.message});
+            } else {
+                res.status(404).json({ error: "Certificate not found" });
+            }
+        } catch (error: any) {
+            if (error.errors) {
+                let validationerror = [];
+                for await (let response of error.errors) {
+                    let obj: { path: string; message: string } = {
+                        path: "",
+                        message: "",
+                    };
+                    obj.path = response.path;
+                    obj.message = response.message;
+                    validationerror.push(obj);
                 }
+                res.status(400).json({ errors: validationerror });
+            } else {
+                res.status(400).json({ error: error.message });
             }
         }
     }
+};
+
 
     public UpdateCertificateStatus = async(req:Request,res:Response)=>{
         let id = req.params.id;
