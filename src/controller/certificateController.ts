@@ -5,11 +5,10 @@ import trainingServiceImplementation from "../service/implementation/trainingSer
 import UserServiceImplementation from "../service/implementation/UserServiceImplementation";
 import Certificate_templateServiceImplementation from "../service/implementation/certificate_templateServiceImplementation";
 import CompanyServiceImplementation from "../service/implementation/companyServiceImplementation";
-import { Readable } from "nodemailer/lib/xoauth2";
+import { Readable, Stream } from "nodemailer/lib/xoauth2";
 import fs from "fs"
 import moment from "moment";
-import { error } from "console";
-import PuppePdf from "puppe-pdf";
+import * as PuppePdf from "puppe-pdf";
 
 class CertificateController{
     Certificate_service: CertificateServiceImplementation
@@ -63,8 +62,8 @@ class CertificateController{
                                                 console.log(CertificateData)
                                                 let data = await this.Certificate_service.CreateCertificate(CertificateData);
                                                 if(data){
-                                                    let pdf_buffer = await PuppePdf.forgePDF(html_string)
-                                                    let stream = Readable.from(pdf_buffer);
+                                                    let options = {html:html_string,stream:true}
+                                                    let stream = await PuppePdf.forgePDF(options) as Stream
                                                     let filename = template.name.replaceAll(" ","_");
                                                     let filePath = `${destination}/${filename+"_"+this.getTimeStamp()+".pdf"}`
                                                     let writer = fs.createWriteStream(filePath);
