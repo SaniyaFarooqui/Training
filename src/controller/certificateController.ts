@@ -9,6 +9,7 @@ import { Readable } from "nodemailer/lib/xoauth2";
 import fs from "fs"
 import moment from "moment";
 import { error } from "console";
+import PuppePdf from "puppe-pdf";
 
 class CertificateController{
     Certificate_service: CertificateServiceImplementation
@@ -62,10 +63,10 @@ class CertificateController{
                                                 console.log(CertificateData)
                                                 let data = await this.Certificate_service.CreateCertificate(CertificateData);
                                                 if(data){
-                                                    let buffer = Buffer.from(html_string);
-                                                    let stream = Readable.from(buffer);
+                                                    let pdf_buffer = await PuppePdf.forgePDF(html_string)
+                                                    let stream = Readable.from(pdf_buffer);
                                                     let filename = template.name.replaceAll(" ","_");
-                                                    let filePath = `${destination}/${filename+"_"+this.getTimeStamp()+".html"}`
+                                                    let filePath = `${destination}/${filename+"_"+this.getTimeStamp()+".pdf"}`
                                                     let writer = fs.createWriteStream(filePath);
                                                     stream.pipe(writer);
                                                     res.status(200).json({message:"Certificate created successfully"})
