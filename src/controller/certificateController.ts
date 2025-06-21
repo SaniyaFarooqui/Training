@@ -62,7 +62,7 @@ class CertificateController{
                                                 console.log(CertificateData)
                                                 let data = await this.Certificate_service.CreateCertificate(CertificateData);
                                                 if(data){
-                                                    let options = {html:html_string,stream:true,landscape:true}
+                                                    let options = {html:html_string,stream:true,pdfOpts:{format:'A4',landscape:true}}
                                                     let stream = await PuppePdf.forgePDF(options) as Stream
                                                     let filename = template.name.replaceAll(" ","_");
                                                     let filePath = `${destination}/${filename+"_"+this.getTimeStamp()+".pdf"}`
