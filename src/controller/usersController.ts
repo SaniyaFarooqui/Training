@@ -87,6 +87,7 @@ class UserController{
             res.status(401).json({errors :"please enter email or password"});
         }else{
             let isExist : userType|null|any|undefined = await this.user_service.GetUserByEmail(email );
+            console.log(isExist)
             if(isExist == null){
                 res.status(400).json({error:"Account doesn't Exist"});
             }else{

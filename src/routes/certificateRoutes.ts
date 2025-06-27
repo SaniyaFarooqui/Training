@@ -12,6 +12,7 @@ CertificateRouter.get("/GetAllCertificates",certificateController.GetAllCertific
 CertificateRouter.get("/GetCertificateById/:id",certificateController.GetCertificateById)
 CertificateRouter.get("/GetCertificateByUserId/:userId",certificateController.GetCertificateByUserId)
 CertificateRouter.get("/GetCertificateByCompanyId/:company_id",certificateController.GetCertificateByCompanyId)
+CertificateRouter.get("/DownloadCertificate/:id",certificateController.DownloadCertificate)
 CertificateRouter.delete("/DeleteCertificate/:id",certificateController.DeleteCertificate)
 CertificateRouter.delete("/BulkDeleteCertificates",certificateController.BulkDeleteCertificates)
 
