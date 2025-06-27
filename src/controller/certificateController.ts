@@ -9,6 +9,7 @@ import { Readable, Stream } from "nodemailer/lib/xoauth2";
 import fs from "fs"
 import moment from "moment";
 import * as PuppePdf from "puppe-pdf";
+import { validate } from "uuid";
 
 class CertificateController{
     Certificate_service: CertificateServiceImplementation
@@ -116,6 +117,7 @@ class CertificateController{
             }
         }
     }
+    
     public UpdateCertificate = async (req: Request, res: Response) => {
     let id = req.params.id;
     let CertificateData = req.body;
@@ -206,7 +208,7 @@ class CertificateController{
             }
         }
     }
-};
+    };
 
 
     public UpdateCertificateStatus = async(req:Request,res:Response)=>{
@@ -244,6 +246,20 @@ class CertificateController{
                     res.status(400).json({errors:error.message})
                 }
             }
+        }
+    }
+
+    public DownloadCertificate = async(req:Request,res:Response)=>{
+        let id = req.params.id;
+        try {
+            if(validate(id)){
+                let certificate = await this.Certificate_service.GetCertificateById(id);
+                
+            }else{
+                res.status(400).json({error:"No certificate found"});
+            }
+        } catch (error:any) {
+            res.status(400).json({error:error.message});
         }
     }
 
