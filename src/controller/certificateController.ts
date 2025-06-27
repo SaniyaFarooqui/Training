@@ -133,18 +133,16 @@ class CertificateController{
                     res.status(400).json({ error: "no such certificate found" });
                 }else{
                     let filePath = path.resolve(isExist.certificate_Path);
-                    if(!fs.existsSync(filePath) || !fs.existsSync(filePath)){
+                    if(!fs.existsSync(filePath)){
                         res.status(404).json({ error: "File not found" });
                     }else{
                         let fileBuffer = fs.readFileSync(filePath);
                         let filename = path.basename(filePath);
                         let contentType = mime.lookup(filePath) || "application/octet-stream";
-
+                        let stream = Readable.from(fileBuffer);
                         res.setHeader("Content-Type", contentType);
                         res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
                         res.setHeader("Content-Length", fileBuffer.length);
-                        
-                        let stream = fs.createReadStream(filePath);
                         stream.pipe(res);
                     }
 
