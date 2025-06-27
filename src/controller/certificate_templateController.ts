@@ -77,7 +77,7 @@ class Certificate_templateController{
         }else if(file == null || file == undefined){
             res.status(400).json({error:"Please select a template file"});
         }else{
-            let variable = ["{{engineer}}","{{company}}","{{productModels}}","{{issueDate}}","{{validTo}}","{{certificateNumber}}","{{qrCode}}"]
+            let variable = ["{{engineer}}","{{company}}","{{Training}}","{{issueDate}}","{{validTo}}","{{certificateNumber}}","{{qrCode}}"]
                 for await(let data of variable){
                     if(!html_string.includes(data)){
                         errors.push(`${data} is not there in template file`);

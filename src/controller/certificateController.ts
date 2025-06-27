@@ -9,7 +9,8 @@ import { Readable, Stream } from "nodemailer/lib/xoauth2";
 import fs from "fs"
 import moment from "moment";
 import * as PuppePdf from "puppe-pdf";
-import { validate } from "uuid";
+import path from "path";
+import mime from "mime";
 
 class CertificateController{
     Certificate_service: CertificateServiceImplementation
@@ -26,6 +27,8 @@ class CertificateController{
         this.templateService = new Certificate_templateServiceImplementation()
         this.companyService = new CompanyServiceImplementation()
     }
+
+   
 
     public CreateCertificate = async(req:Request,res:Response)=>{
         let CertificateData = req.body
@@ -57,19 +60,20 @@ class CertificateController{
                                                 html_string = html_string.replace("{{issueDate}}", moment(CertificateData.issued_date).format('YYYY-MM-DD'));
                                                 html_string = html_string.replace("{{certificateNumber}}", certificate_number);
 
-                                                
+                                                let filename = template.name.replaceAll(" ","_");
+                                                let filePath = `${destination}/${filename+"_"+this.getTimeStamp()+".pdf"}`
+                                                let url = `${process.env.server}/${filePath}`
+                                                CertificateData["certificate_Path"]= url
                                                 CertificateData["certificate_no"] = String(certificate_number)
                                                 CertificateData["issued_by"] = user_id
                                                 console.log(CertificateData)
                                                 let data = await this.Certificate_service.CreateCertificate(CertificateData);
                                                 if(data){
-                                                    let options = {html:html_string,stream:true,pdfOpts:{format:'A4',landscape:true}}
+                                                    let options = {html:html_string,stream:true,pdfOpts: {format: 'A4',landscape: true}}
                                                     let stream = await PuppePdf.forgePDF(options) as Stream
-                                                    let filename = template.name.replaceAll(" ","_");
-                                                    let filePath = `${destination}/${filename+"_"+this.getTimeStamp()+".pdf"}`
                                                     let writer = fs.createWriteStream(filePath);
                                                     stream.pipe(writer);
-                                                    res.status(200).json({message:"Certificate created successfully"})
+                                                    res.status(200).json({message:"Certificate created successfully",data:data})
                                                 }else{
                                                     res.status(400).json({message:"Certificate cannot be created please try again"})
                                                 }
@@ -117,7 +121,55 @@ class CertificateController{
             }
         }
     }
-    
+
+    public DownloadCertificate = async(req: Request, res: Response)=>{
+        let id = req.params.id;
+        if(id == undefined || id == null){
+            res.status(400).json({ error: "Please provide id" });
+        }else{
+            try {
+                let isExist = await this.Certificate_service.GetCertificateById(id);
+                if(isExist == null || isExist == undefined){
+                    res.status(400).json({ error: "no such certificate found" });
+                }else{
+                    let filePath = path.resolve(isExist.certificate_Path);
+                    if(!fs.existsSync(filePath) || !fs.existsSync(filePath)){
+                        res.status(404).json({ error: "File not found" });
+                    }else{
+                        let fileBuffer = fs.readFileSync(filePath);
+                        let filename = path.basename(filePath);
+                        let contentType = mime.lookup(filePath) || "application/octet-stream";
+
+                        res.setHeader("Content-Type", contentType);
+                        res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+                        res.setHeader("Content-Length", fileBuffer.length);
+                        
+                        let stream = fs.createReadStream(filePath);
+                        stream.pipe(res);
+                    }
+
+                }
+            } catch (error: any) {
+                if(error.errors){
+                    let validationerror = []
+                    for await(let response of error.errors){
+                        let obj :{path : string,message : string} = {
+                            path: "",
+                            message: ""
+                        };
+                        obj.path = response.path,
+                        obj.message = response.message
+                        validationerror.push(obj);
+                    }
+                    res.status(400).json({errors : validationerror});
+                }else{
+                    res.status(400).json({errors : error.message});
+                }
+            }
+        }
+
+    }
+
     public UpdateCertificate = async (req: Request, res: Response) => {
     let id = req.params.id;
     let CertificateData = req.body;
@@ -246,20 +298,6 @@ class CertificateController{
                     res.status(400).json({errors:error.message})
                 }
             }
-        }
-    }
-
-    public DownloadCertificate = async(req:Request,res:Response)=>{
-        let id = req.params.id;
-        try {
-            if(validate(id)){
-                let certificate = await this.Certificate_service.GetCertificateById(id);
-                
-            }else{
-                res.status(400).json({error:"No certificate found"});
-            }
-        } catch (error:any) {
-            res.status(400).json({error:error.message});
         }
     }
 

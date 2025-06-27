@@ -18,8 +18,6 @@ UserRouter?.get('/dashboard', isAuthenticated, (req:Request, res:Response) => {
   res.json({ message: `Welcome user ${req.user?.email}` });
 });
 
-
-
 UserRouter.post("/CreateUser",upload.single("profile_image"),isAuthenticated,RolesRestrict,PermissonsRestrict,userController.CreateUser)
 UserRouter.post("/LoginController",userController.LoginController)
 UserRouter.post("/RefreshToken/:token",userController.RefreshToken)
