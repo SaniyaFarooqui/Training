@@ -63,7 +63,8 @@ class CertificateController{
                                                 let filename = template.name.replaceAll(" ","_");
                                                 let filePath = `${destination}/${filename+"_"+this.getTimeStamp()+".pdf"}`
                                                 let url = `${process.env.server}/${filePath}`
-                                                CertificateData["certificate_Path"]= url
+                                                CertificateData["certificate_Path"]= filePath
+                                                CertificateData["url"]=url
                                                 CertificateData["certificate_no"] = String(certificate_number)
                                                 CertificateData["issued_by"] = user_id
                                                 console.log(CertificateData)

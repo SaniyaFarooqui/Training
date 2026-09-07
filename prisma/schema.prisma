@@ -245,6 +245,7 @@ model certificates{
   status certificate_status
   is_archived Boolean
   certificate_Path String?
+  url String
   template_id String
   needRecreate Boolean
   createdAt DateTime @default(now())
